@@ -7,4 +7,21 @@ class Manga {
   String id;
   String name;
   String thumbnailUrl;
+  String lastUpdated;
+
+  bool operator ==(o) {
+    return o is Manga && this.id == o.id;
+  }
+
+  int get hashCode {
+    return this.id.hashCode;
+  }
+
+  String toString() {
+    return '$id, $name, $thumbnailUrl, $lastUpdated';
+  }
+}
+
+abstract class Cursor {
+  Future<List<Manga>> getNext();
 }
