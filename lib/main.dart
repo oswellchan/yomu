@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:yomu/src/sources/mangatown.dart';
 import 'src/reader/reader.dart';
 import 'src/discover/discover.dart';
 
@@ -14,6 +13,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        textTheme: Typography(platform: TargetPlatform.iOS).white,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -43,9 +43,9 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget page;
 
     if (_page == 0) {
-      page = Reader();
-    } else {
       page = Discover();
+    } else {
+      page = Reader();
     }
 
     return Scaffold(
@@ -53,12 +53,13 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: page
+        child: page,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _togglePage,
         child: Icon(Icons.add),
       ),
+      backgroundColor: Colors.black,
     );
   }
 }

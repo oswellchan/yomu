@@ -17,27 +17,32 @@ class DiscoverState extends State<Discover> {
       _cursor = _source.getLatestMangas();
     }
 
-    print('building');
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      child: ListView.builder(
+        itemBuilder: (BuildContext _context, int i) {
+          if (i * 3 >= _mangas.length) {
+            if (_notFetching) {
+              _notFetching = false;
+              _fetchNextList();
+            } else {
+              return null;
+            }
+          }
 
-    return ListView.builder(
-      itemBuilder: (BuildContext _context, int i) {
-        if (i >= _mangas.length && _notFetching) {
-          _notFetching = false;
-          _fetchNextList();
+          var start = i * 3;
+          if (start + 3 <= _mangas.length) {
+            return _buildRow(_mangas.sublist(start, start + 3));
+          }
+
+          return null;
         }
-        
-        if (i < _mangas.length) {
-          return _buildManga(_mangas[i]);
-        }
-        return null;
-      }
+      )
     );
   }
 
   void _fetchNextList() async {
-    print('in fetch');
     var mangas = await _cursor.getNext();
-    print(mangas);
     setState(() {
       _mangas.addAll(mangas);
       _notFetching = true;
@@ -50,17 +55,69 @@ class Discover extends StatefulWidget {
   DiscoverState createState() => DiscoverState();
 }
 
+Widget _buildRow(List<Manga> mangas) {
+  var widgets = <Widget>[];
+  mangas.forEach((manga) {
+    widgets.add(
+      Flexible(
+        child: FractionallySizedBox(
+          widthFactor: 0.95,
+          child: _buildManga(manga),
+        ),
+      )
+    );
+  });
+
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceAround,
+    children: widgets,
+  );
+}
+
 Widget _buildManga(Manga manga) {
   return Column(
     children: <Widget>[
-      CachedNetworkImage(
-        imageUrl: manga.thumbnailUrl,
-        placeholder: (context, url) => CircularProgressIndicator(),
-        errorWidget: (context, url, error) => Icon(Icons.error),
+      Container(
+        margin: const EdgeInsets.only(bottom: 5.0),
+        child: SizedBox(
+          width: double.infinity,
+          height: 200,
+          child: CachedNetworkImage(
+            imageUrl: manga.thumbnailUrl,
+            placeholder: (context, url) => Center(
+              child: SizedBox(
+                child: CircularProgressIndicator(),
+                height: 50.0,
+                width: 50.0,
+              )
+            ),
+            errorWidget: (context, url, error) => Container(
+              color: Colors.grey,
+              child: Icon(Icons.error),
+            )
+          ),
+        ),
       ),
-      Text(manga.id),
-      Text(manga.name),
-      Text(manga.lastUpdated),
+      SizedBox(
+        width: double.infinity,
+        height: 70,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              manga.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              manga.lastUpdated,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
     ],
   );
 }
