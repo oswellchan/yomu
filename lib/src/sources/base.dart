@@ -7,6 +7,7 @@ class Manga {
   String id;
   String name;
   String thumbnailUrl;
+  String mangaUrl;
   String lastUpdated;
 
   bool operator ==(o) {

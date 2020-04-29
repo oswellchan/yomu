@@ -122,7 +122,9 @@ class MangaTownCursor extends Cursor {
       return null;
     }
 
-    var splitHref = eCover.attributes['href'].split('/');
+    manga.mangaUrl = eCover.attributes['href'];
+
+    var splitHref = manga.mangaUrl.split('/');
     if (splitHref.length != 4) {
       return null;
     }

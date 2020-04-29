@@ -1,22 +1,53 @@
 import 'package:flutter/material.dart';
-import 'src/reader/reader.dart';
-import 'src/discover/discover.dart';
+import 'package:flutter/cupertino.dart';
+
+import 'src/reader.dart';
+import 'src/discover.dart';
+import 'src/manga_overview.dart';
 
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return CupertinoApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        textTheme: Typography(platform: TargetPlatform.iOS).white,
+      theme: new CupertinoThemeData(
+        brightness: Brightness.dark,
+        primaryColor: CupertinoColors.black,
+        barBackgroundColor: CupertinoColors.black,
+        scaffoldBackgroundColor: CupertinoColors.black,
+        textTheme: new CupertinoTextThemeData(
+          primaryColor: CupertinoColors.white,
+          textStyle: TextStyle(color: CupertinoColors.white),
+        ),
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
+      onGenerateRoute: _onGenerateRoute,
     );
+  }
+
+  Route _onGenerateRoute(RouteSettings settings) {
+    Route page;
+    switch (settings.name) {
+      case "/":
+        page = CupertinoPageRoute(
+          title: 'Discover',
+          settings: settings,
+          builder: (context) => Discover(),
+        );
+        break;
+      case "/manga":
+        page = CupertinoPageRoute(
+          title: 'Manga',
+          fullscreenDialog: true,
+          settings: settings,
+          builder: (context) => MangaOverview(),
+        );
+        break;
+    }
+    return page;
   }
 }
 
@@ -48,18 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
       page = Reader();
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(),
+      child: Center(
         child: page,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _togglePage,
-        child: Icon(Icons.add),
-      ),
-      backgroundColor: Colors.black,
     );
   }
 }
