@@ -79,8 +79,7 @@ class MangaRow extends StatelessWidget {
               name: manga.name,
               lastUpdated: manga.lastUpdated,
               onPress: () {
-                Navigator.pushNamed(
-                  context,
+                Navigator.of(context).pushNamed(
                   '/manga',
                   arguments: manga
                 );

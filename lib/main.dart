@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-import 'src/reader.dart';
 import 'src/discover.dart';
 import 'src/manga_overview.dart';
 
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -61,28 +63,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _page = 0;
-
-  void _togglePage() {
-    setState(() {
-      _page = (_page + 1) % 2;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    Widget page;
-
-    if (_page == 0) {
-      page = Discover();
-    } else {
-      page = Reader();
-    }
-
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(),
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Discover')
+      ),
       child: Center(
-        child: page,
+        child: Discover(),
       ),
     );
   }
