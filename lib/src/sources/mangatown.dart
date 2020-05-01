@@ -14,8 +14,39 @@ class MangaTown extends Source {
     return MangaTownCursor();
   }
 
-  Manga getMangaDetails(String id) {
-    return Manga();
+  Future<MangaDetails> getMangaDetails(String mangaUrl) async {
+    final url = '${this.url}$mangaUrl';
+    final response = await http.get(url);
+    
+    var document = parse(response.body);
+    var elements = document.getElementsByClassName('chapter_list');
+
+    if (elements.isEmpty) {
+      return MangaDetails('', <Link>[]);
+    }
+
+    var results = <Link>[];
+    elements[0].children.forEach((element) {
+      var chapter = _parseLink(element);
+      if (chapter != null) {
+        results.add(chapter); 
+      }
+    });
+
+    return MangaDetails('', results);
+  }
+
+  Link _parseLink(Element element) {
+    var a = element.getElementsByTagName('a');
+    if (a.isEmpty) {
+      return null;
+    }
+
+    if (!a[0].attributes.containsKey('href')) {
+      return null;
+    }
+
+    return Link(a[0].attributes['href'], a[0].text);
   }
 
   Future<List<String>> getChapterPages(String id, num chapter) async {

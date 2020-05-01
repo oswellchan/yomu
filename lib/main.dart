@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'src/discover.dart';
 import 'src/manga_overview.dart';
+import 'src/reader.dart';
 
 
 void main() {
@@ -33,19 +34,26 @@ class MyApp extends StatelessWidget {
   Route _onGenerateRoute(RouteSettings settings) {
     Route page;
     switch (settings.name) {
-      case "/":
+      case '/':
         page = CupertinoPageRoute(
           title: 'Discover',
           settings: settings,
           builder: (context) => Discover(),
         );
         break;
-      case "/manga":
+      case '/manga':
         page = CupertinoPageRoute(
           title: 'Manga',
           fullscreenDialog: true,
           settings: settings,
           builder: (context) => MangaOverview(),
+        );
+        break;
+      case '/read':
+        page = CupertinoPageRoute(
+          fullscreenDialog: true,
+          settings: settings,
+          builder: (context) => Reader(),
         );
         break;
     }

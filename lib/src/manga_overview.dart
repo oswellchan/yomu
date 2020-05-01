@@ -19,7 +19,9 @@ class MangaOverviewState extends State<MangaOverview> {
           child: Column(
             children: <Widget>[
               NavBar(),
-              MangaDetail(manga: manga),
+              Expanded(
+                child: MangaDetail(manga: manga)
+              ),
             ],
           )
         ),
@@ -65,21 +67,24 @@ class MangaDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        CachedNetworkImage(
-          imageUrl: manga.thumbnailUrl,
-          placeholder: (context, url) => Center(
-            child: SizedBox(
-              child: CupertinoActivityIndicator(),
-              height:70.0,
-              width: 70.0,
+        SizedBox(
+          height: 200,
+          child: CachedNetworkImage(
+            imageUrl: manga.thumbnailUrl,
+            placeholder: (context, url) => Center(
+              child: SizedBox(
+                child: CupertinoActivityIndicator(),
+                height:70.0,
+                width: 70.0,
+              )
+            ),
+            errorWidget: (context, url, error) => Container(
+              width: 150,
+              height: 200,
+              color: CupertinoColors.systemGrey,
+              child: Icon(Icons.error),
             )
           ),
-          errorWidget: (context, url, error) => Container(
-            width: 200,
-            height: 310,
-            color: CupertinoColors.systemGrey,
-            child: Icon(Icons.error),
-          )
         ),
         SizedBox(height: 20),
         FractionallySizedBox(
@@ -88,13 +93,116 @@ class MangaDetail extends StatelessWidget {
             manga.name,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 24,
+              fontSize: 22,
             ),
             textAlign: TextAlign.center,
           ),
         ),
         SizedBox(height: 20),
+        Expanded(
+          child: Chapters(mangaUrl: manga.mangaUrl),
+        ),
       ],
+    );
+  }
+}
+
+class ChaptersState extends State<Chapters> {
+  final MangaTown _source = MangaTown();
+  List<Link> _chapters = <Link>[];
+  bool _notFetching = true;
+
+  final String mangaUrl;
+
+  ChaptersState({
+    @required this.mangaUrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (_notFetching) {
+      _fetchMangaDetails();
+      _notFetching = false;
+    }
+
+    var length = _chapters.length;
+
+    return Container(
+      height: 1000,
+      child: FractionallySizedBox(
+        widthFactor: 0.8,
+        child: ListView.separated(
+          itemCount: _chapters.length,
+          separatorBuilder: (BuildContext context, int index) {
+            return Divider(
+              color: CupertinoColors.systemGrey.withOpacity(0.5),
+            );
+          },
+          itemBuilder: (BuildContext _context, int i) {
+            return ChapterTile(
+              name: 'Chapter ${length - i}',
+              url: _chapters[i].url,
+            );
+          }
+        )
+      ),
+    );
+  }
+
+  void _fetchMangaDetails() async {
+    var details = await _source.getMangaDetails(mangaUrl);
+    if (details.chapters.isNotEmpty) {
+      setState(() {
+        _chapters = details.chapters.reversed.toList();
+      });
+    }
+  }
+}
+
+class Chapters extends StatefulWidget {
+  final String mangaUrl;
+
+  Chapters({
+    @required this.mangaUrl,
+  });
+
+  @override
+  ChaptersState createState() => ChaptersState(mangaUrl: mangaUrl);
+}
+
+class ChapterTile extends StatelessWidget {
+
+  final String url;
+  final String name;
+
+  ChapterTile({
+    @required this.url,
+    @required this.name,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector (
+      child: Container(
+        height: 30,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+        )
+      ),
+      onTap: () {
+        Navigator.of(context).pushNamed(
+          '/reader',
+          arguments: this.url,
+        );
+      }
     );
   }
 }

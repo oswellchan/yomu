@@ -1,5 +1,5 @@
 abstract class Source {
-  Manga getMangaDetails(String id);
+  Future<MangaDetails> getMangaDetails(String id);
   Future<List<String>> getChapterPages(String id, num chapter);
 }
 
@@ -21,6 +21,20 @@ class Manga {
   String toString() {
     return '$id, $name, $thumbnailUrl, $lastUpdated';
   }
+}
+
+class MangaDetails {
+  String summary;
+  List<Link> chapters;
+
+  MangaDetails(this.summary, this.chapters);
+}
+
+class Link {
+  String url;
+  String text;
+
+  Link(this.url, this.text);
 }
 
 abstract class Cursor {
