@@ -1,6 +1,6 @@
 abstract class Source {
   Future<MangaDetails> getMangaDetails(String id);
-  Future<List<String>> getChapterPages(String id, num chapter);
+  Future<MangaPages> getChapterPages(String chptUrl);
 }
 
 class Manga {
@@ -35,6 +35,14 @@ class Link {
   String text;
 
   Link(this.url, this.text);
+}
+
+class MangaPages {
+  List<String> pages;
+  String nextChapterUrl;
+  String prevChapterUrl;
+
+  MangaPages(this.pages, this.prevChapterUrl, this.nextChapterUrl);
 }
 
 abstract class Cursor {

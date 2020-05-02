@@ -49,17 +49,19 @@ class MangaTown extends Source {
     return Link(a[0].attributes['href'], a[0].text);
   }
 
-  Future<List<String>> getChapterPages(String id, num chapter) async {
-    final chptUrl = '${this.url}/manga/$id/c$chapter/';
-    final response = await http.get(chptUrl);
+  Future<MangaPages> getChapterPages(chptUrl) async {
+    final response = await http.get(this.url + chptUrl);
 
-    var maxPages = _getNumberOfPages(response.body, id, chapter);
+    var maxPages = _getNumberOfPages(response.body, chptUrl);
+    var pages = await _getPages(chptUrl, maxPages);
 
-    return _getPages(response.body, maxPages);
+    var prevNextChapter = _getPrevNextChapterUrls(response.body, chptUrl);
+
+    return MangaPages(pages, prevNextChapter[0], prevNextChapter[1]);
   }
 
-  num _getNumberOfPages(String body, String id, num chapter) {
-    var exp = new RegExp('option value="/manga/$id/c$chapter/([0-9]+).html');
+  num _getNumberOfPages(String body, chptUrl) {
+    var exp = new RegExp('option value="$chptUrl([0-9]+).html');
     var matches = exp.allMatches(body);
 
     var maxPages = 0;
@@ -76,30 +78,47 @@ class MangaTown extends Source {
     return maxPages;
   }
 
-  List<String> _getPages(String body, num maxPages) {
-    var exp = new RegExp(r'//l.mangatown.com/store/manga/.*?.jpg');
-    var match = exp.firstMatch(body);
-
-    var url = match.group(0);
-    exp = new RegExp(r'(.*)([0-9]{3}).jpg$');
-    match = exp.firstMatch(url);
-
-    var startingPage = 0;
-    try {
-      var val = double.parse('0.${match.group(2)}1');
-      startingPage = (val * 100).round();
-    } catch(e) {
-      return <String>[];
+  Future<List<String>> _getPages(String chptUrl, num maxPages) async {
+    var futures = <Future<http.Response>>[];
+    for (var i = 0; i < maxPages; i++) {
+      futures.add(http.get('$url$chptUrl${i + 1}.html'));
     }
 
-    var preUrl = match.group(1);
+    var results = await Future.wait(futures);
+
     var imgUrls = <String>[];
-    for(var i = 0; i < maxPages; i++) {
-      var number = (startingPage + i).toString().padLeft(3, '0');
-      imgUrls.add('http:$preUrl$number.jpg');
-    }
+    results.forEach((response) {
+      var body = response.body;
+      var exp = new RegExp(r'//l.mangatown.com/store/manga/.*?.jpg');
+      var match = exp.firstMatch(body);
+
+      var pageUrl = match.group(0);
+      imgUrls.add('http:$pageUrl');
+    });
 
     return imgUrls;
+  }
+
+  List<String> _getPrevNextChapterUrls(String body, chptUrl) {
+    var document = parse(body);
+    var chapterList = document.getElementById('top_chapter_list');
+    var prevChapter = '';
+    var nextChapter = '';
+    var options = chapterList.children;
+
+    for (var i = 0; i < options.length; i++) {
+      var option = options[i];
+      var val = option.attributes['value'];
+      if (val == chptUrl) {
+        if (i + 1 < options.length) {
+          nextChapter = options[i + 1].attributes['value'];
+        }
+        break;
+      }
+      prevChapter = val;
+    }
+
+    return [prevChapter, nextChapter];
   }
 }
 

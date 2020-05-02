@@ -128,7 +128,6 @@ class ChaptersState extends State<Chapters> {
     var length = _chapters.length;
 
     return Container(
-      height: 1000,
       child: FractionallySizedBox(
         widthFactor: 0.8,
         child: ListView.separated(
@@ -141,7 +140,7 @@ class ChaptersState extends State<Chapters> {
           itemBuilder: (BuildContext _context, int i) {
             return ChapterTile(
               name: 'Chapter ${length - i}',
-              url: _chapters[i].url,
+              url: _chapters[length - i - 1].url,
             );
           }
         )
@@ -199,7 +198,7 @@ class ChapterTile extends StatelessWidget {
       ),
       onTap: () {
         Navigator.of(context).pushNamed(
-          '/reader',
+          '/read',
           arguments: this.url,
         );
       }
