@@ -7,6 +7,8 @@ import 'src/manga_overview.dart';
 import 'src/reader/reader.dart';
 import 'src/database/db.dart';
 
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
 
 void main() {
   DBHelper();  // init db
@@ -30,6 +32,7 @@ class MyApp extends StatelessWidget {
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
       onGenerateRoute: _onGenerateRoute,
+      navigatorObservers: [routeObserver],
     );
   }
 
@@ -48,7 +51,9 @@ class MyApp extends StatelessWidget {
           title: 'Manga',
           fullscreenDialog: true,
           settings: settings,
-          builder: (context) => MangaOverview(),
+          builder: (context) => MangaOverview(
+            routeObserver: routeObserver,
+          ),
         );
         break;
       case '/read':

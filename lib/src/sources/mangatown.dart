@@ -27,7 +27,6 @@ class MangaTown extends Source {
     }
 
     var allRead = await DBHelper().getAllRead(mangaUrl);
-    print(allRead);
     var allReadSet = <String>{};
     allReadSet.addAll(allRead);
 

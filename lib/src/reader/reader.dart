@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../database/db.dart';
 import '../manga_overview.dart';
 import '../sources/mangatown.dart';
 import 'arguments.dart';
@@ -12,7 +13,6 @@ class ReaderState extends State<Reader> {
   final List<String> _images = <String>[];
   final Set<String> _chapters = <String>{};
   String _manga;
-  Function _readCallback;
   
   bool _isFetching = false;
   String _prevChapter;
@@ -24,7 +24,6 @@ class ReaderState extends State<Reader> {
   Widget build(BuildContext context) {
     ReaderArguments args = ModalRoute.of(context).settings.arguments;
     _manga = args.mangaUrl;
-    _readCallback = args.readCallBack;
 
     var chapterUrl = args.chapterUrl;   
     if (!_chapters.contains(chapterUrl)) {
@@ -68,7 +67,7 @@ class ReaderState extends State<Reader> {
     _isFetching = true;
     var chpt = await _source.getChapterPages(url);
 
-    if (_manga != '') _readCallback(url);
+    if (_manga != '') DBHelper().saveRead(_manga, url);
 
     if (_currChapter == chpt.nextChapterUrl) {
       // append at the back
