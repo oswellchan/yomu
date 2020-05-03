@@ -138,9 +138,10 @@ class ChaptersState extends State<Chapters> {
             );
           },
           itemBuilder: (BuildContext _context, int i) {
+            var chapter = _chapters[length - i - 1];
             return ChapterTile(
-              name: 'Chapter ${length - i}',
-              url: _chapters[length - i - 1].url,
+              name: chapter.text,
+              url: chapter.url,
             );
           }
         )

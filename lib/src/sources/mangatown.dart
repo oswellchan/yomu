@@ -46,7 +46,17 @@ class MangaTown extends Source {
       return null;
     }
 
-    return Link(a[0].attributes['href'], a[0].text);
+    var name = a[0].text;
+    var words = name.split(' ');
+    var chapterNum = '';
+    for (var i = words.length - 1; i >= 0; i--) {
+      if (words[i] != '') {
+        chapterNum = words[i];
+        break;
+      }
+    }
+
+    return Link(a[0].attributes['href'], 'Chapter $chapterNum');
   }
 
   Future<MangaPages> getChapterPages(chptUrl) async {
