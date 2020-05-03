@@ -46,6 +46,8 @@ class DiscoverState extends State<Discover> {
 
   void _fetchNextList() async {
     var mangas = await _cursor.getNext();
+    if (!mounted) return;
+
     setState(() {
       _mangas.addAll(mangas);
       _notFetching = true;

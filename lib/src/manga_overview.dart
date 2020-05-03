@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import 'database/db.dart';
+import 'reader/arguments.dart';
 import 'sources/base.dart';
 import 'sources/mangatown.dart';
 
@@ -109,7 +111,7 @@ class MangaDetail extends StatelessWidget {
 
 class ChaptersState extends State<Chapters> {
   final MangaTown _source = MangaTown();
-  List<Link> _chapters = <Link>[];
+  List<Chapter> _chapters = <Chapter>[];
   bool _notFetching = true;
 
   final String mangaUrl;
@@ -140,8 +142,8 @@ class ChaptersState extends State<Chapters> {
           itemBuilder: (BuildContext _context, int i) {
             var chapter = _chapters[length - i - 1];
             return ChapterTile(
-              name: chapter.text,
-              url: chapter.url,
+              chapter: chapter,
+              manga: mangaUrl,
             );
           }
         )
@@ -151,7 +153,9 @@ class ChaptersState extends State<Chapters> {
 
   void _fetchMangaDetails() async {
     var details = await _source.getMangaDetails(mangaUrl);
+
     if (details.chapters.isNotEmpty) {
+      if (!mounted) return;
       setState(() {
         _chapters = details.chapters.reversed.toList();
       });
@@ -170,28 +174,33 @@ class Chapters extends StatefulWidget {
   ChaptersState createState() => ChaptersState(mangaUrl: mangaUrl);
 }
 
-class ChapterTile extends StatelessWidget {
+class ChapterTileState extends State<ChapterTile> {
 
-  final String url;
-  final String name;
+  final Chapter chapter;
+  final String manga;
+  bool isRead;
 
-  ChapterTile({
-    @required this.url,
-    @required this.name,
-  });
+  ChapterTileState({
+    @required this.chapter,
+    @required this.manga,
+  })
+  : isRead = chapter.isRead;
 
   @override
   Widget build(BuildContext context) {
+    var textColour = isRead ? CupertinoColors.systemGrey : null;
+
     return GestureDetector (
       child: Container(
         height: 30,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            name,
+            chapter.text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
+              color: textColour,
               fontSize: 16,
             ),
           ),
@@ -200,9 +209,34 @@ class ChapterTile extends StatelessWidget {
       onTap: () {
         Navigator.of(context).pushNamed(
           '/read',
-          arguments: this.url,
+          arguments: ReaderArguments(
+            manga, chapter.url, setRead
+          ),
         );
       }
     );
   }
+
+  void setRead(url) async {
+    await DBHelper().saveRead(manga, url);
+    if (mounted) {
+      setState(() {
+        isRead = true;
+      });
+    }
+  }
+}
+
+class ChapterTile extends StatefulWidget {
+
+  final Chapter chapter;
+  final String manga;
+
+  ChapterTile({
+    @required this.chapter,
+    @required this.manga,
+  });
+
+  @override
+  ChapterTileState createState() => ChapterTileState(chapter: chapter, manga: manga);
 }

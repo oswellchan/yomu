@@ -25,16 +25,17 @@ class Manga {
 
 class MangaDetails {
   String summary;
-  List<Link> chapters;
+  List<Chapter> chapters;
 
   MangaDetails(this.summary, this.chapters);
 }
 
-class Link {
+class Chapter {
   String url;
   String text;
+  bool isRead = false;
 
-  Link(this.url, this.text);
+  Chapter(this.url, this.text);
 }
 
 class MangaPages {

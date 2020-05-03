@@ -2,14 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'manga_overview.dart';
-import 'sources/mangatown.dart';
+import '../manga_overview.dart';
+import '../sources/mangatown.dart';
+import 'arguments.dart';
 
 
 class ReaderState extends State<Reader> {
   final MangaTown _source = MangaTown();
   final List<String> _images = <String>[];
   final Set<String> _chapters = <String>{};
+  String _manga;
+  Function _readCallback;
   
   bool _isFetching = false;
   String _prevChapter;
@@ -19,8 +22,11 @@ class ReaderState extends State<Reader> {
 
   @override
   Widget build(BuildContext context) {
-    var chapterUrl = ModalRoute.of(context).settings.arguments;
-    
+    ReaderArguments args = ModalRoute.of(context).settings.arguments;
+    _manga = args.mangaUrl;
+    _readCallback = args.readCallBack;
+
+    var chapterUrl = args.chapterUrl;   
     if (!_chapters.contains(chapterUrl)) {
       _nextChapter = chapterUrl;
     }
@@ -61,12 +67,16 @@ class ReaderState extends State<Reader> {
 
     _isFetching = true;
     var chpt = await _source.getChapterPages(url);
+
+    if (_manga != '') _readCallback(url);
+
     if (_currChapter == chpt.nextChapterUrl) {
       // append at the back
     } else {
       _images.addAll(chpt.pages);
     }
 
+    if (!mounted) return;
     setState(() {
       _chapters.add(url);
       _prevChapter = chpt.prevChapterUrl;

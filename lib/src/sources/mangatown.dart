@@ -1,11 +1,12 @@
 import 'dart:math';
 
-// import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
+import '../database/db.dart';
 import 'base.dart';
+
 
 class MangaTown extends Source {
   final url = 'https://www.mangatown.com/';
@@ -22,21 +23,29 @@ class MangaTown extends Source {
     var elements = document.getElementsByClassName('chapter_list');
 
     if (elements.isEmpty) {
-      return MangaDetails('', <Link>[]);
+      return MangaDetails('', <Chapter>[]);
     }
 
-    var results = <Link>[];
+    var allRead = await DBHelper().getAllRead(mangaUrl);
+    print(allRead);
+    var allReadSet = <String>{};
+    allReadSet.addAll(allRead);
+
+    var results = <Chapter>[];
     elements[0].children.forEach((element) {
       var chapter = _parseLink(element);
       if (chapter != null) {
-        results.add(chapter); 
+        if (allReadSet.contains(chapter.url)) {
+          chapter.isRead = true;
+        }
+        results.add(chapter);
       }
     });
 
     return MangaDetails('', results);
   }
 
-  Link _parseLink(Element element) {
+  Chapter _parseLink(Element element) {
     var a = element.getElementsByTagName('a');
     if (a.isEmpty) {
       return null;
@@ -56,7 +65,7 @@ class MangaTown extends Source {
       }
     }
 
-    return Link(a[0].attributes['href'], 'Chapter $chapterNum');
+    return Chapter(a[0].attributes['href'], 'Chapter $chapterNum');
   }
 
   Future<MangaPages> getChapterPages(chptUrl) async {
