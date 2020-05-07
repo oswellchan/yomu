@@ -21,6 +21,7 @@ class ReaderState extends State<Reader> {
   String _prevChapter;
   String _currChapter;
   String _nextChapter;
+  bool _disableScroll = false;
 
 
   @override
@@ -49,6 +50,7 @@ class ReaderState extends State<Reader> {
 
   Widget _buildPages(List<String> images) {
     return ListView.builder(
+      physics: _disableScroll ? const  NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
       itemBuilder: (BuildContext _context, int i) {
         if (i >= _images.length) {
           if (!_isFetching) {
@@ -57,7 +59,7 @@ class ReaderState extends State<Reader> {
           return null;
         }
 
-        return _buildPage(images[i]);
+        return _buildPage(images[i], _disableScrolling);
       }
     );
   }
@@ -87,6 +89,12 @@ class ReaderState extends State<Reader> {
       _isFetching = false;
     });
   }
+
+  void _disableScrolling(bool disable) {
+    setState(() {
+      _disableScroll = disable;
+    });
+  }
 }
 
 class Reader extends StatefulWidget {
@@ -94,10 +102,11 @@ class Reader extends StatefulWidget {
   ReaderState createState() => ReaderState();
 }
 
-Widget _buildPage(String pageUrl) {
+Widget _buildPage(String pageUrl, Function onInteract) {
   return Container(
     padding: const EdgeInsets.only(bottom: 10),
     child: ZoomableWidget(
+      onInteract: onInteract,
       child: CachedNetworkImage(
         imageUrl: pageUrl,
         placeholder: (context, url) => Center(
@@ -117,30 +126,57 @@ Widget _buildPage(String pageUrl) {
 }
 
 class ZoomableWidgetState extends State<ZoomableWidget> 
-  with SingleTickerProviderStateMixin {
-  var matrix = Matrix4.identity();
-  var zoomOffset = Offset.zero;
-  var originalSize;
+  with TickerProviderStateMixin {
   var oldGlobalPoint = Offset.zero;
+  
   var _scale = 1.0;
+  var _reference = Offset.zero;
+  var _translateOffset = Offset.zero;
+  var _reverseTranslateOffset = Offset.zero;
+  var _zoomOffset = Offset.zero;
 
   AnimationController _zoomController;
+  AnimationController _resetController;
 
   @override
   void initState() {
     super.initState();
+    _initZoomController();
+    _initResetController();
+  }
+
+  void _initZoomController() {
     _zoomController = AnimationController(
-        vsync: this,
-        lowerBound: 1 / 1.2,
-        upperBound: 1.2,
-        duration: Duration(seconds: 1));
+      vsync: this,
+      lowerBound: 1.0,
+      upperBound: 2.0,
+      duration: Duration(milliseconds: 500)
+    );
     _zoomController.addListener(() {
       setState(() {
         _scale = _zoomController.value;
-        if (_scale == 1 / 1.2) {
-          matrix = Matrix4.identity();
-        } else {
-          matrix.scale(_scale, _scale);
+      });
+    });
+  }
+
+  void _initResetController() {
+    _resetController = AnimationController(
+      vsync: this,
+      lowerBound: 1.0,
+      upperBound: 2.0,
+      duration: Duration(milliseconds: 500)
+    );
+    _resetController.addListener(() {
+      setState(() {
+        var val = _resetController.value;
+        _translateOffset = _reverseTranslateOffset * (val - 1);
+        _scale = val;
+
+        if (_scale == 1) {
+          _reference = Offset.zero;
+          _translateOffset = Offset.zero;
+          _reverseTranslateOffset = Offset.zero;
+          _zoomOffset = Offset.zero;
         }
       });
     });
@@ -149,6 +185,7 @@ class ZoomableWidgetState extends State<ZoomableWidget>
   @override
   void dispose() {
     _zoomController.dispose();
+    _resetController.dispose();
     super.dispose();
   }
   
@@ -157,28 +194,25 @@ class ZoomableWidgetState extends State<ZoomableWidget>
     return ClipRect(
       child: GestureDetector(
         child: Transform(
-          transform: matrix,
-          origin: zoomOffset,
-          child: widget.child
+          transform: Matrix4.identity()
+            ..translate(_translateOffset.dx, _translateOffset.dy)
+            ..scale(_scale, _scale),
+          child: widget.child,
+          origin: _zoomOffset,
         ),
         onTapDown: _onTapDown,
+        onPanUpdate: _onPanUpdate,
       ),
     );
   }
 
   void _onTapDown(TapDownDetails details) {
-    if (matrix == Matrix4.identity()) {
-      var x = details.localPosition.dx;
-      var y = details.localPosition.dy;
-      zoomOffset = Offset(x, y);
-    }
-
     var currGlobalPointX = details.globalPosition.dx;
     var currGlobalPointY = details.globalPosition.dy;
     var currGlobalPoint = Offset(currGlobalPointX, currGlobalPointY);
 
     if (_isDoubleTap(currGlobalPoint)) {
-      _onDoubleTap();
+      _onDoubleTap(details.localPosition);
     }
 
     oldGlobalPoint = currGlobalPoint;
@@ -195,36 +229,79 @@ class ZoomableWidgetState extends State<ZoomableWidget>
     return false;
   }
 
-  void _onDoubleTap() {
+  void _onDoubleTap(Offset doubleTapPoint) {
     // Prevent interaction
-    if (_zoomController.isAnimating) {
+    if (_zoomController.isAnimating || _resetController.isAnimating) {
       return;
     }
 
     oldGlobalPoint = Offset.zero;
     setState(() {
-      if (matrix == Matrix4.identity()) {
-        _zoomController.forward(from: 1.0);
+      if (_scale == 1.0) {
+        applyZoom(doubleTapPoint);
       } else {
-        _zoomController.reverse(from: 1.0);
+        reset();
       }
     });
   }
 
-  // Offset _clampOffset(Offset offset) {
-  //   final Size size = context.size;
-  //   final Offset minOffset =
-  //       new Offset(size.width, size.height) * (1.0 - _scale);
-  //   return new Offset(
-  //       offset.dx.clamp(minOffset.dx, 0.0), offset.dy.clamp(minOffset.dy, 0.0));
-  // }
+  void applyZoom(Offset doubleTapPoint) {
+    _zoomOffset = doubleTapPoint;
+    _reference = Offset(
+      doubleTapPoint.dx,
+      context.size.height - doubleTapPoint.dy
+    );
+    _zoomController.forward(from: 1.0);
+    widget.onInteract(true);
+  }
+
+  void reset() {
+    _reverseTranslateOffset = _translateOffset;
+    _resetController.reverse(from: 2.0);
+    widget.onInteract(false);
+  }
+
+  void _onPanUpdate(DragUpdateDetails details) {
+    if (_scale == 1.0) widget.onInteract(false);
+
+    if (_scale == 1.0 || 
+      _zoomController.isAnimating || 
+      _resetController.isAnimating) {
+      return;
+    }
+
+    var delta = _clampDelta(details.delta);
+    setState(() {
+      _reference += Offset(delta.dx * -1, delta.dy);
+      _translateOffset += delta;
+    });
+  }
+
+  Offset _clampDelta(Offset delta) {
+    final Size size = context.size;
+    final Offset bounds = Offset(size.width, size.height) * (_scale - 1.0);
+
+    var normalisedDelta = Offset(delta.dx * -1, delta.dy);
+
+    var expected = _reference + normalisedDelta;
+    var actual = Offset(
+      expected.dx.clamp(0.0, bounds.dx),
+      expected.dy.clamp(0.0, bounds.dy),
+    );
+
+    var diff = normalisedDelta - (expected - actual);
+
+    return Offset(diff.dx * -1, diff.dy);
+  }
 }
 
 class ZoomableWidget extends StatefulWidget {
   final Widget child;
+  final Function onInteract;
 
   ZoomableWidget({
     @required this.child,
+    @required this.onInteract,
   });
 
   @override
