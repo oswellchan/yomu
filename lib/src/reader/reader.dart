@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -148,13 +149,13 @@ class ZoomableWidgetState extends State<ZoomableWidget>
   void _initZoomController() {
     _zoomController = AnimationController(
       vsync: this,
-      lowerBound: 1.0,
-      upperBound: 2.0,
-      duration: Duration(milliseconds: 500)
+      lowerBound: 2.0,
+      upperBound: 4.0,
+      duration: Duration(milliseconds: 250)
     );
     _zoomController.addListener(() {
       setState(() {
-        _scale = _zoomController.value;
+        _scale = log(_zoomController.value) / ln2;
       });
     });
   }
@@ -163,12 +164,12 @@ class ZoomableWidgetState extends State<ZoomableWidget>
     _resetController = AnimationController(
       vsync: this,
       lowerBound: 1.0,
-      upperBound: 2.0,
-      duration: Duration(milliseconds: 500)
+      upperBound: sqrt2,
+      duration: Duration(milliseconds: 250)
     );
     _resetController.addListener(() {
       setState(() {
-        var val = _resetController.value;
+        var val = pow(_resetController.value, 2);
         _translateOffset = _reverseTranslateOffset * (val - 1);
         _scale = val;
 
@@ -257,7 +258,7 @@ class ZoomableWidgetState extends State<ZoomableWidget>
 
   void reset() {
     _reverseTranslateOffset = _translateOffset;
-    _resetController.reverse(from: 2.0);
+    _resetController.reverse(from: sqrt2);
     widget.onInteract(false);
   }
 
