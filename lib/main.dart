@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'src/discover.dart';
 import 'src/manga_overview.dart';
+import 'src/search.dart';
 import 'src/reader/reader.dart';
 import 'src/database/db.dart';
 
@@ -82,11 +83,39 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: const Text('Discover')
-      ),
-      child: Center(
-        child: Discover(),
+      child: CupertinoTabScaffold(
+        tabBar: CupertinoTabBar(
+          activeColor: CupertinoColors.white,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.home),
+              title: Text('Discover'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.search),
+              title: Text('Search'),
+            ),
+          ],
+        ),
+        tabBuilder: (context, index) {
+          switch (index) {
+            case 0:
+              return CupertinoTabView(builder: (context) {
+                return CupertinoPageScaffold(
+                  navigationBar: CupertinoNavigationBar(
+                    middle: const Text('Discover')
+                  ),
+                  child: Discover(),
+                );
+              });
+            case 1:
+              return CupertinoTabView(builder: (context) {
+                return CupertinoPageScaffold(
+                  child: Search(),
+                );
+              });
+          }
+        },
       ),
     );
   }
