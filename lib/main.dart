@@ -83,6 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      resizeToAvoidBottomInset: false,
       child: CupertinoTabScaffold(
         tabBar: CupertinoTabBar(
           activeColor: CupertinoColors.white,

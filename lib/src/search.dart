@@ -32,6 +32,12 @@ class SearchState extends State<Search> {
 
   void _onTextChanged() {
     // TODO: Implement search on demand
+    if (_controller.text.isEmpty) {
+      setState(() {
+        _cursor = null;
+        _mangas.clear();
+      });
+    }
   }
 
   Widget _buildSearchBox() {
@@ -110,6 +116,8 @@ class SearchState extends State<Search> {
   }
 
   void _search(String term) {
+    if (term.isEmpty) return;
+
     setState(() {
       _cursor = _source.getSearchResults(term);
       _mangas.clear();
