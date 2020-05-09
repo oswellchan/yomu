@@ -1,7 +1,8 @@
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:html/dom.dart';
+import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 
 import '../database/db.dart';
@@ -11,8 +12,13 @@ import 'base.dart';
 class MangaTown extends Source {
   final url = 'https://www.mangatown.com/';
 
-  MangaTownCursor getLatestMangas() {
-    return MangaTownCursor();
+  MangaTownLatestCursor getLatestMangas() {
+    return MangaTownLatestCursor();
+  }
+
+  MangaTownSearchCursor getSearchResults(String search) {
+    print('called: $search');
+    return MangaTownSearchCursor(search);
   }
 
   Future<MangaDetails> getMangaDetails(String mangaUrl) async {
@@ -44,7 +50,7 @@ class MangaTown extends Source {
     return MangaDetails('', results);
   }
 
-  Chapter _parseLink(Element element) {
+  Chapter _parseLink(dom.Element element) {
     var a = element.getElementsByTagName('a');
     if (a.isEmpty) {
       return null;
@@ -140,11 +146,11 @@ class MangaTown extends Source {
   }
 }
 
-class MangaTownCursor extends Cursor {
+class MangaTownLatestCursor extends Cursor {
   Set<Manga> _oldResult;
   num _index;
 
-  MangaTownCursor() {
+  MangaTownLatestCursor() {
     _index = 1;
   }
 
@@ -177,7 +183,7 @@ class MangaTownCursor extends Cursor {
     return results;
   }
 
-  Manga _parseManga(Element element) {
+  Manga _parseManga(dom.Element element) {
     var manga = Manga();
     var elements = element.getElementsByClassName('manga_cover');
     if (elements.isEmpty) {
@@ -211,5 +217,26 @@ class MangaTownCursor extends Cursor {
     manga.lastUpdated = eLast.text;
 
     return manga;
+  }
+}
+
+class MangaTownSearchCursor extends MangaTownLatestCursor {
+  String searchTerm;
+
+  MangaTownSearchCursor(String searchTerm) {
+    this.searchTerm = searchTerm;
+  }
+
+  Future<List<Manga>> getNext() async {
+    print(this.searchTerm);
+    var url = 'https://www.mangatown.com/search?page=$_index&name=${searchTerm}';
+    url = Uri.encodeFull(url);
+    final response = await http.get(url);
+    print(url);
+    var mangas = _getMangas(response.body);
+
+    _index += 1;
+
+    return mangas;
   }
 }

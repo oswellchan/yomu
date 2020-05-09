@@ -10,7 +10,7 @@ class SearchState extends State<Search> {
   final MangaTown _source = MangaTown();
   List<Manga> _mangas = <Manga>[];
   bool _notFetching = true;
-  MangaTownCursor _cursor;
+  MangaTownSearchCursor _cursor;
 
   TextEditingController _controller;
   FocusNode _focusNode;
@@ -40,7 +40,7 @@ class SearchState extends State<Search> {
       child: SearchBar(
         controller: _controller,
         focusNode: _focusNode,
-        onSubmitted: _fetchNextList,
+        onSubmitted: _search,
       ),
     );
   }
@@ -65,16 +65,24 @@ class SearchState extends State<Search> {
                   ),
                   child: ListView.builder(
                     itemBuilder: (BuildContext _context, int i) {
-                      if (i * 3 >= _mangas.length) {
+                      var start = i * 3;
+                      if (start >= _mangas.length) {
+                        if (_notFetching) {
+                          _notFetching = false;
+                          _fetchNextList();
+                        }
                         return null;
                       }
 
-                      var start = i * 3;
+                      var mangas = <Manga>[];
                       if (start + 3 <= _mangas.length) {
-                        return MangaRow(mangas: _mangas.sublist(start, start + 3));
+                        mangas = _mangas.sublist(start, start + 3);
+                      } else {
+                        var temp = _mangas.sublist(start);
+                        mangas = temp + List.filled(start + 3 - _mangas.length, null);
                       }
 
-                      return null;
+                      return MangaRow(mangas: mangas);
                     }
                   ),
                 ),
@@ -86,15 +94,27 @@ class SearchState extends State<Search> {
     );
   }
 
-  void _fetchNextList(String search) async {
-    print(search);
-    // var mangas = await _cursor.getNext();
-    // if (!mounted) return;
+  void _fetchNextList() async {
+    if (_cursor == null) return;
 
-    // setState(() {
-    //   _mangas.addAll(mangas);
-    //   _notFetching = true;
-    // });
+    var mangas = await _cursor.getNext();
+    if (!mounted) return;
+
+    setState(() {
+      _mangas.addAll(mangas);
+      // Stop fetching when no more results
+      if (mangas.isNotEmpty) {
+        _notFetching = true;
+      }
+    });
+  }
+
+  void _search(String term) {
+    setState(() {
+      _cursor = _source.getSearchResults(term);
+      _mangas.clear();
+    });
+    _fetchNextList();
   }
 }
 

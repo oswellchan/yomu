@@ -10,7 +10,7 @@ class DiscoverState extends State<Discover> {
   final MangaTown _source = MangaTown();
   List<Manga> _mangas = <Manga>[];
   bool _notFetching = true;
-  MangaTownCursor _cursor;
+  MangaTownLatestCursor _cursor;
 
   @override
   Widget build(BuildContext context) {

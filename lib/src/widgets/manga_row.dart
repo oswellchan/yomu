@@ -16,21 +16,27 @@ class MangaRow extends StatelessWidget {
   Widget build(BuildContext context) {
     var widgets = <Widget>[];
     mangas.forEach((manga) {
+      Widget widget = Container();
+      
+      if (manga != null) {
+        widget = MangaTile(
+          thumbnailUrl: manga.thumbnailUrl,
+          name: manga.name,
+          lastUpdated: manga.lastUpdated,
+          onPress: () {
+            Navigator.of(context, rootNavigator: true).pushNamed(
+              '/manga',
+              arguments: manga
+            );
+          }
+        );
+      }
+
       widgets.add(
         Flexible(
           child: FractionallySizedBox(
             widthFactor: 0.95,
-            child: MangaTile(
-              thumbnailUrl: manga.thumbnailUrl,
-              name: manga.name,
-              lastUpdated: manga.lastUpdated,
-              onPress: () {
-                Navigator.of(context).pushNamed(
-                  '/manga',
-                  arguments: manga
-                );
-              }
-            ),
+            child: widget
           ),
         )
       );

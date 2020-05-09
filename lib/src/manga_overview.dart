@@ -54,7 +54,7 @@ class NavBar extends StatelessWidget {
       children: <Widget>[
         CupertinoButton(
           onPressed: () {
-            Navigator.of(context).pop(context);
+            Navigator.of(context, rootNavigator: true).pop(context);
           },
           child: Icon(
             CupertinoIcons.clear_thick,
@@ -226,7 +226,7 @@ class ChapterTileState extends State<ChapterTile> {
         )
       ),
       onTap: () {
-        Navigator.of(context).pushNamed(
+        Navigator.of(context, rootNavigator: true).pushNamed(
           '/read',
           arguments: ReaderArguments(
             widget.manga,

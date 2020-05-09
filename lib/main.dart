@@ -32,8 +32,40 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
+      onGenerateRoute: _onGenerateRoute,
       navigatorObservers: [routeObserver],
     );
+  }
+
+  Route _onGenerateRoute(RouteSettings settings) {
+    Route page;
+    switch (settings.name) {
+      case '/':
+        page = CupertinoPageRoute(
+          title: 'Discover',
+          settings: settings,
+          builder: (context) => Discover(),
+        );
+        break;
+      case '/manga':
+        page = CupertinoPageRoute(
+          title: 'Manga',
+          fullscreenDialog: true,
+          settings: settings,
+          builder: (context) => MangaOverview(
+            routeObserver: routeObserver,
+          ),
+        );
+        break;
+      case '/read':
+        page = CupertinoPageRoute(
+          fullscreenDialog: true,
+          settings: settings,
+          builder: (context) => Reader(),
+        );
+        break;
+    }
+    return page;
   }
 }
 
@@ -69,7 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
           switch (index) {
             case 0:
               return CupertinoTabView(
-                onGenerateRoute: _onGenerateRoute,
                 builder: (context) {
                   return CupertinoPageScaffold(
                     navigationBar: CupertinoNavigationBar(
@@ -81,7 +112,6 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             case 1:
               return CupertinoTabView(
-                onGenerateRoute: _onGenerateRoute,
                 builder: (context) {
                 return CupertinoPageScaffold(
                   child: Search(),
@@ -92,36 +122,5 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
     );
-  }
-
-  Route _onGenerateRoute(RouteSettings settings) {
-    Route page;
-    switch (settings.name) {
-      case '/':
-        page = CupertinoPageRoute(
-          title: 'Discover',
-          settings: settings,
-          builder: (context) => Discover(),
-        );
-        break;
-      case '/manga':
-        page = CupertinoPageRoute(
-          title: 'Manga',
-          fullscreenDialog: true,
-          settings: settings,
-          builder: (context) => MangaOverview(
-            routeObserver: routeObserver,
-          ),
-        );
-        break;
-      case '/read':
-        page = CupertinoPageRoute(
-          fullscreenDialog: true,
-          settings: settings,
-          builder: (context) => Reader(),
-        );
-        break;
-    }
-    return page;
   }
 }
