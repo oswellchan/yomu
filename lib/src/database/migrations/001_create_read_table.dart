@@ -1,7 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 
 
-void onCreate(Database db, int version) async {
+Future onCreate(Database db) async {
   // When creating the db, create the table
   await db.execute(
     """CREATE TABLE read(

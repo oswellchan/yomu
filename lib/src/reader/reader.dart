@@ -6,12 +6,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../database/db.dart';
 import '../manga_overview.dart';
 import '../sources/mangatown.dart';
+import '../sources/mangakakalot.dart';
 import '../widgets/zoomable_widget.dart';
 import 'arguments.dart';
 
 
 class ReaderState extends State<Reader> {
-  final MangaTown _source = MangaTown();
+  final Mangakakalot _source = Mangakakalot();
   final List<String> _images = <String>[];
   final Set<String> _chapters = <String>{};
   String _manga;
@@ -58,7 +59,7 @@ class ReaderState extends State<Reader> {
           return null;
         }
 
-        return _buildPage(images[i], _disableScrolling);
+        return _buildPage(images[i], _manga, _disableScrolling);
       }
     );
   }
@@ -71,7 +72,9 @@ class ReaderState extends State<Reader> {
     _isFetching = true;
     var chpt = await _source.getChapterPages(url);
 
-    if (_manga != '') DBHelper().saveRead(_manga, url);
+    if (_manga != '') DBHelper().saveRead(
+      _source.name, _manga, url
+    );
 
     if (_currChapter == chpt.nextChapterUrl) {
       // append at the back
@@ -101,12 +104,13 @@ class Reader extends StatefulWidget {
   ReaderState createState() => ReaderState();
 }
 
-Widget _buildPage(String pageUrl, Function onInteract) {
+Widget _buildPage(String pageUrl, String mangaUrl, Function onInteract) {
   return Container(
     padding: const EdgeInsets.only(bottom: 10),
     child: ZoomableWidget(
       onInteract: onInteract,
       child: CachedNetworkImage(
+        httpHeaders: {'referer': mangaUrl},
         imageUrl: pageUrl,
         placeholder: (context, url) => Center(
           child: SizedBox(

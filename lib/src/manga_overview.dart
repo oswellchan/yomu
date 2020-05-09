@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'reader/arguments.dart';
 import 'sources/base.dart';
 import 'sources/mangatown.dart';
+import 'sources/mangakakalot.dart';
 
 
 class MangaOverviewState extends State<MangaOverview> with RouteAware {
@@ -124,7 +125,7 @@ class MangaDetail extends StatelessWidget {
 }
 
 class ChaptersState extends State<Chapters> with RouteAware {
-  final MangaTown _source = MangaTown();
+  final Source _source = Mangakakalot();
   List<Chapter> _chapters = <Chapter>[];
   bool _notFetching = true;
 

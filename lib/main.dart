@@ -6,13 +6,11 @@ import 'src/discover.dart';
 import 'src/manga_overview.dart';
 import 'src/search.dart';
 import 'src/reader/reader.dart';
-import 'src/database/db.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 
 void main() {
-  DBHelper();  // init db
   runApp(MyApp());
 }
 

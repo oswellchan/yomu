@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
@@ -10,14 +9,14 @@ import 'base.dart';
 
 
 class MangaTown extends Source {
+  final name = 'MangaTown';
   final url = 'https://www.mangatown.com/';
 
-  MangaTownLatestCursor getLatestMangas() {
+  Cursor getLatestMangas() {
     return MangaTownLatestCursor();
   }
 
-  MangaTownSearchCursor getSearchResults(String search) {
-    print('called: $search');
+  Cursor getSearchResults(String search) {
     return MangaTownSearchCursor(search);
   }
 
@@ -32,7 +31,7 @@ class MangaTown extends Source {
       return MangaDetails('', <Chapter>[]);
     }
 
-    var allRead = await DBHelper().getAllRead(mangaUrl);
+    var allRead = await DBHelper().getAllRead(name, mangaUrl);
     var allReadSet = <String>{};
     allReadSet.addAll(allRead);
 
@@ -228,11 +227,9 @@ class MangaTownSearchCursor extends MangaTownLatestCursor {
   }
 
   Future<List<Manga>> getNext() async {
-    print(this.searchTerm);
     var url = 'https://www.mangatown.com/search?page=$_index&name=${searchTerm}';
     url = Uri.encodeFull(url);
     final response = await http.get(url);
-    print(url);
     var mangas = _getMangas(response.body);
 
     _index += 1;

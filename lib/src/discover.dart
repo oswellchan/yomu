@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'sources/base.dart';
-import 'sources/mangatown.dart';
+import 'sources/mangakakalot.dart';
 import 'widgets/manga_row.dart';
 
 
 class DiscoverState extends State<Discover> {
-  final MangaTown _source = MangaTown();
+  final Source _source = Mangakakalot();
   List<Manga> _mangas = <Manga>[];
   bool _notFetching = true;
-  MangaTownLatestCursor _cursor;
+  Cursor _cursor;
 
   @override
   Widget build(BuildContext context) {

@@ -3,14 +3,15 @@ import 'package:flutter/cupertino.dart';
 
 import 'sources/base.dart';
 import 'sources/mangatown.dart';
+import 'sources/mangakakalot.dart';
 import 'widgets/manga_row.dart';
 import 'widgets/search_bar.dart';
 
 class SearchState extends State<Search> {
-  final MangaTown _source = MangaTown();
+  final Source _source = Mangakakalot();
   List<Manga> _mangas = <Manga>[];
   bool _notFetching = true;
-  MangaTownSearchCursor _cursor;
+  Cursor _cursor;
 
   TextEditingController _controller;
   FocusNode _focusNode;

@@ -1,6 +1,8 @@
 abstract class Source {
   Future<MangaDetails> getMangaDetails(String id);
   Future<MangaPages> getChapterPages(String chptUrl);
+  Cursor getLatestMangas();
+  Cursor getSearchResults(String search);
 }
 
 class Manga {
