@@ -30,7 +30,7 @@ class ZoomableWidgetState extends State<ZoomableWidget>
       vsync: this,
       lowerBound: 2.0,
       upperBound: 4.0,
-      duration: Duration(milliseconds: 250)
+      duration: Duration(milliseconds: 200)
     );
     _zoomController.addListener(() {
       setState(() {
@@ -132,18 +132,14 @@ class ZoomableWidgetState extends State<ZoomableWidget>
       context.size.height - doubleTapPoint.dy
     );
     _zoomController.forward(from: 1.0);
-    widget.onInteract(true);
   }
 
   void reset() {
     _reverseTranslateOffset = _translateOffset;
     _resetController.reverse(from: sqrt2);
-    widget.onInteract(false);
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    if (_scale == 1.0) widget.onInteract(false);
-
     if (_scale == 1.0 || 
       _zoomController.isAnimating || 
       _resetController.isAnimating) {

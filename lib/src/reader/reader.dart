@@ -21,15 +21,13 @@ class ReaderState extends State<Reader> {
   String _prevChapter;
   String _currChapter;
   String _nextChapter;
-  bool _disableScroll = false;
-
 
   @override
   Widget build(BuildContext context) {
     ReaderArguments args = ModalRoute.of(context).settings.arguments;
     _manga = args.mangaUrl;
 
-    var chapterUrl = args.chapterUrl;   
+    var chapterUrl = args.chapterUrl;
     if (!_chapters.contains(chapterUrl)) {
       _nextChapter = chapterUrl;
     }
@@ -40,8 +38,11 @@ class ReaderState extends State<Reader> {
           children: <Widget>[
             NavBar(),
             Expanded(
-              child: _buildPages(this._images),
-            )
+              child: ZoomableWidget(
+                child: _buildPages(this._images),
+                onInteract: null,
+              ),
+            ),
           ],
         )
       )
@@ -50,7 +51,6 @@ class ReaderState extends State<Reader> {
 
   Widget _buildPages(List<String> images) {
     return ListView.builder(
-      physics: _disableScroll ? const  NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
       itemBuilder: (BuildContext _context, int i) {
         if (i >= _images.length) {
           if (!_isFetching) {
@@ -59,7 +59,7 @@ class ReaderState extends State<Reader> {
           return null;
         }
 
-        return _buildPage(images[i], _manga, _disableScrolling);
+        return _buildPage(images[i], _manga);
       }
     );
   }
@@ -91,12 +91,6 @@ class ReaderState extends State<Reader> {
       _isFetching = false;
     });
   }
-
-  void _disableScrolling(bool disable) {
-    setState(() {
-      _disableScroll = disable;
-    });
-  }
 }
 
 class Reader extends StatefulWidget {
@@ -104,26 +98,23 @@ class Reader extends StatefulWidget {
   ReaderState createState() => ReaderState();
 }
 
-Widget _buildPage(String pageUrl, String mangaUrl, Function onInteract) {
+Widget _buildPage(String pageUrl, String mangaUrl) {
   return Container(
     padding: const EdgeInsets.only(bottom: 10),
-    child: ZoomableWidget(
-      onInteract: onInteract,
-      child: CachedNetworkImage(
-        httpHeaders: {'referer': mangaUrl},
-        imageUrl: pageUrl,
-        placeholder: (context, url) => Center(
-          child: SizedBox(
-            child: CupertinoActivityIndicator(),
-            height:70.0,
-            width: 70.0,
-          )
-        ),
-        errorWidget: (context, url, error) => Container(
-          color: CupertinoColors.systemGrey,
-          child: Icon(Icons.error),
+    child: CachedNetworkImage(
+      httpHeaders: {'referer': mangaUrl},
+      imageUrl: pageUrl,
+      placeholder: (context, url) => Center(
+        child: SizedBox(
+          child: CupertinoActivityIndicator(),
+          height:70.0,
+          width: 70.0,
         )
       ),
+      errorWidget: (context, url, error) => Container(
+        color: CupertinoColors.systemGrey,
+        child: Icon(Icons.error),
+      )
     ),
   );
 }
