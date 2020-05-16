@@ -32,11 +32,9 @@ class DiscoverState extends State<Discover> {
       child = _buildList();
     }
 
-    return CupertinoPageScaffold(
-      child: Container(
-        padding: const EdgeInsets.all(8.0),
-        child: child
-      ),
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      child: child
     );
   }
 

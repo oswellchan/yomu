@@ -17,24 +17,40 @@ class ZoomableWidgetState extends State<ZoomableWidget>
 
   AnimationController _zoomController;
   AnimationController _resetController;
+  Animation _zoomAnimation;
+  Animation _resetAnimation;
 
   @override
   void initState() {
     super.initState();
     _initZoomController();
     _initResetController();
+
+    _zoomAnimation = new Tween(
+      begin: 1.0,
+      end: 2.0,
+    ).animate(new CurvedAnimation(
+      parent: _zoomController,
+      curve: Curves.easeOutExpo
+    ));
+
+    _resetAnimation = new Tween(
+      begin: 1.0,
+      end: 2.0,
+    ).animate(new CurvedAnimation(
+      parent: _resetController,
+      curve: Curves.easeInExpo
+    ));
   }
 
   void _initZoomController() {
     _zoomController = AnimationController(
       vsync: this,
-      lowerBound: 2.0,
-      upperBound: 4.0,
-      duration: Duration(milliseconds: 200)
+      duration: Duration(milliseconds: 300)
     );
     _zoomController.addListener(() {
       setState(() {
-        _scale = log(_zoomController.value) / ln2;
+        _scale = _zoomAnimation.value;
       });
     });
   }
@@ -42,13 +58,11 @@ class ZoomableWidgetState extends State<ZoomableWidget>
   void _initResetController() {
     _resetController = AnimationController(
       vsync: this,
-      lowerBound: 1.0,
-      upperBound: sqrt2,
-      duration: Duration(milliseconds: 250)
+      duration: Duration(milliseconds: 300)
     );
     _resetController.addListener(() {
       setState(() {
-        var val = pow(_resetController.value, 2);
+        var val = _resetAnimation.value;
         _translateOffset = _reverseTranslateOffset * (val - 1);
         _scale = val;
 
@@ -131,12 +145,12 @@ class ZoomableWidgetState extends State<ZoomableWidget>
       doubleTapPoint.dx,
       context.size.height - doubleTapPoint.dy
     );
-    _zoomController.forward(from: 1.0);
+    _zoomController.forward(from: 0.0);
   }
 
   void reset() {
     _reverseTranslateOffset = _translateOffset;
-    _resetController.reverse(from: sqrt2);
+    _resetController.reverse(from: 2.0);
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
