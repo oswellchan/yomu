@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../sources/base.dart';
+import '../widgets/spinner.dart';
 
 class MangaRow extends StatelessWidget {
 
@@ -73,11 +74,7 @@ class MangaTile extends StatelessWidget {
         child: CachedNetworkImage(
           imageUrl: thumbnailUrl,
           placeholder: (context, url) => Center(
-            child: SizedBox(
-              child: CupertinoActivityIndicator(),
-              height:70.0,
-              width: 70.0,
-            )
+            child: Spinner(),
           ),
           errorWidget: (context, url, error) => Container(
             color: CupertinoColors.systemGrey,

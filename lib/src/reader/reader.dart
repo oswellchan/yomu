@@ -7,6 +7,7 @@ import '../database/db.dart';
 import '../manga_overview.dart';
 import '../sources/mangatown.dart';
 import '../sources/mangakakalot.dart';
+import '../widgets/spinner.dart';
 import '../widgets/zoomable_widget.dart';
 import 'arguments.dart';
 
@@ -55,6 +56,7 @@ class ReaderState extends State<Reader> {
         if (i >= _images.length) {
           if (!_isFetching) {
             _fetchPages(_nextChapter);
+            return Spinner();
           }
           return null;
         }
@@ -65,7 +67,7 @@ class ReaderState extends State<Reader> {
   }
 
   void _fetchPages(String url) async {
-    if (_chapters.contains(url)) {
+    if (_chapters.contains(url) || url == null) {
       return;
     }
 
@@ -105,11 +107,7 @@ Widget _buildPage(String pageUrl, String mangaUrl) {
       httpHeaders: {'referer': mangaUrl},
       imageUrl: pageUrl,
       placeholder: (context, url) => Center(
-        child: SizedBox(
-          child: CupertinoActivityIndicator(),
-          height:70.0,
-          width: 70.0,
-        )
+        child: Spinner(),
       ),
       errorWidget: (context, url, error) => Container(
         color: CupertinoColors.systemGrey,

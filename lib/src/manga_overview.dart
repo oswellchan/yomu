@@ -6,6 +6,7 @@ import 'reader/arguments.dart';
 import 'sources/base.dart';
 import 'sources/mangatown.dart';
 import 'sources/mangakakalot.dart';
+import 'widgets/spinner.dart';
 
 
 class MangaOverviewState extends State<MangaOverview> with RouteAware {
@@ -86,11 +87,7 @@ class MangaDetail extends StatelessWidget {
           child: CachedNetworkImage(
             imageUrl: manga.thumbnailUrl,
             placeholder: (context, url) => Center(
-              child: SizedBox(
-                child: CupertinoActivityIndicator(),
-                height:70.0,
-                width: 70.0,
-              )
+              child: Spinner(),
             ),
             errorWidget: (context, url, error) => Container(
               width: 150,
@@ -127,7 +124,7 @@ class MangaDetail extends StatelessWidget {
 class ChaptersState extends State<Chapters> with RouteAware {
   final Source _source = Mangakakalot();
   List<Chapter> _chapters = <Chapter>[];
-  bool _notFetching = true;
+  bool _fetching = false;
 
   @override
   void didChangeDependencies() {
@@ -149,9 +146,9 @@ class ChaptersState extends State<Chapters> with RouteAware {
   @override
   Widget build(BuildContext context) {
 
-    if (_notFetching) {
+    if (!_fetching) {
       _fetchMangaDetails();
-      _notFetching = false;
+      return Spinner();
     }
 
     var length = _chapters.length;
@@ -179,6 +176,7 @@ class ChaptersState extends State<Chapters> with RouteAware {
   }
 
   void _fetchMangaDetails() async {
+    _fetching = true;
     var details = await _source.getMangaDetails(widget.mangaUrl);
 
     if (details.chapters.isNotEmpty) {
