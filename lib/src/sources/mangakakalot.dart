@@ -1,9 +1,13 @@
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
+import 'package:http/http.dart';
 
 import '../database/db.dart';
 import 'base.dart';
+
+const maxRetry = 2;
 
 class Mangakakalot extends Source {
   final name = 'mangakakalot';
@@ -18,12 +22,12 @@ class Mangakakalot extends Source {
   }
 
   Future<MangaDetails> getMangaDetails(String mangaUrl) async {
-    final response = await http.get(mangaUrl);
-
     if (mangaUrl.contains('https://manganelo.com/')) {
+      final response = await _getNeloWebPage(mangaUrl);
       return await _parseNeloDetails(mangaUrl, response.body);
     }
     
+    final response = await http.get(mangaUrl);
     return await _parseKakalotDetails(mangaUrl, response.body);
   }
 
@@ -96,14 +100,14 @@ class Mangakakalot extends Source {
   }
 
   Future<MangaPages> getChapterPages(chptUrl) async {
-    final response = await http.get(chptUrl);
-
     if (chptUrl.startsWith('https://manganelo.com/')) {
+      final response = await _getNeloWebPage(chptUrl);
       var pages = _getNeloPages(response.body);
       var prevNextChapter = _getPrevNextNeloChapterUrls(response.body, chptUrl);
       return MangaPages(pages, prevNextChapter[0], prevNextChapter[1]);
     }
 
+    final response = await http.get(chptUrl);
     var pages = _getKakalotPages(response.body);
     var prevNextChapter = _getPrevNextKakalotChapterUrls(response.body, chptUrl);
 
@@ -303,4 +307,23 @@ class MangakakalotSearchCursor extends MangakakalotLatestCursor {
 
     return manga;
   }
+}
+
+Future<Response> _getNeloWebPage(String url) async {
+  var response = await http.get(url);
+  var retryCount = 0;
+
+  while (_isPHPError(response.body) && retryCount < maxRetry) {
+    debugPrint(response.body, wrapWidth: 1024);
+    response = await http.get(url);
+    retryCount += 1;
+  }
+
+  return response;
+}
+
+bool _isPHPError(String body) {
+    var exp = new RegExp(r'<h4>A PHP Error was encountered</h4>');
+
+    return !(exp.firstMatch(body) == null);
 }
