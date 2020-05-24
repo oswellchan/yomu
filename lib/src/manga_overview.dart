@@ -179,12 +179,13 @@ class ChaptersState extends State<Chapters> with RouteAware {
     _fetching = true;
     var details = await _source.getMangaDetails(widget.mangaUrl);
 
-    if (details.chapters.isNotEmpty) {
-      if (!mounted) return;
-      setState(() {
+    if (!mounted) return;
+
+    setState(() {
+      if (details.chapters.isNotEmpty) {
         _chapters = details.chapters.reversed.toList();
-      });
-    }
+      }
+    });
   }
 }
 

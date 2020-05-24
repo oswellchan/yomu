@@ -19,9 +19,9 @@ class ReaderState extends State<Reader> {
   String _manga;
   
   bool _isFetching = false;
-  String _prevChapter;
-  String _currChapter;
-  String _nextChapter;
+  String _prevChapter = '';
+  String _currChapter = '';
+  String _nextChapter = '';
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class ReaderState extends State<Reader> {
     return ListView.builder(
       itemBuilder: (BuildContext _context, int i) {
         if (i >= _images.length) {
-          if (!_isFetching) {
+          if (_nextChapter != '' && !_isFetching) {
             _fetchPages(_nextChapter);
             return Spinner();
           }
@@ -67,7 +67,7 @@ class ReaderState extends State<Reader> {
   }
 
   void _fetchPages(String url) async {
-    if (_chapters.contains(url) || url == null) {
+    if (_chapters.contains(url) || url == null || url == '') {
       return;
     }
 
