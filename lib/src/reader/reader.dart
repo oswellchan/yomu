@@ -78,19 +78,19 @@ class ReaderState extends State<Reader> {
       _source.name, _manga, url
     );
 
-    if (_currChapter == chpt.nextChapterUrl) {
-      // append at the back
-    } else {
-      _images.addAll(chpt.pages);
-    }
-
-    if (!mounted) return;
+    if (!mounted) return;    
     setState(() {
       _chapters.add(url);
       _prevChapter = chpt.prevChapterUrl;
       _currChapter = url;
       _nextChapter = chpt.nextChapterUrl;
       _isFetching = false;
+
+      if (_currChapter == chpt.nextChapterUrl) {
+        // append at the back
+      } else {
+        _images.addAll(chpt.pages);
+      }
     });
   }
 }
