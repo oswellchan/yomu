@@ -5,13 +5,15 @@ import 'package:sqflite/sqflite.dart';
 
 import 'migrations/001_create_read_table.dart';
 import 'migrations/002_add_source_to_read.dart';
+import 'migrations/003_add_manga_add_timestamp.dart';
 
 class DBHelper{
 
   final String _dbPath = 'yomu.db';
   static Database _db;
   var upgrades = [
-    upgradeTo002
+    upgradeTo002,
+    upgradeTo003,
   ];
 
   Future<Database> get db async {
@@ -27,7 +29,7 @@ class DBHelper{
 
     var theDb = await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onDowngrade: _onDowngrade
@@ -53,7 +55,6 @@ class DBHelper{
     });
   }
 
-  // Retrieving employees from Employee Tables
   Future<List<String>> getAllRead(String source, String manga) async {
     var dbClient = await db;
     
@@ -74,11 +75,25 @@ class DBHelper{
   
   Future<int> saveRead(String source, String manga, String chapter) async {
     var dbClient = await db;
+
+    final ts = DateTime.now().millisecondsSinceEpoch;
     var recordId = await dbClient.insert(
       'read',
-      {'source': source, 'manga': manga, 'chapter': chapter},
-      conflictAlgorithm: ConflictAlgorithm.ignore,
+      {'source': source, 'manga': manga, 'chapter': chapter, 'ts': ts},
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    return recordId;
+  }
+
+  Future<int> saveManga(String source, String manga, String name) async {
+    var dbClient = await db;
+
+    var recordId = await dbClient.insert(
+      'manga',
+      {'source': source, 'manga': manga, 'name': name},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
     return recordId;
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import 'database/db.dart';
 import 'reader/arguments.dart';
 import 'sources/base.dart';
 import 'sources/mangatown.dart';
@@ -10,6 +11,19 @@ import 'widgets/spinner.dart';
 
 
 class MangaOverviewState extends State<MangaOverview> with RouteAware {
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration.zero,() {
+      final Manga manga = ModalRoute.of(context).settings.arguments;
+      DBHelper().saveManga(
+        Mangakakalot().name,
+        manga.mangaUrl,
+        manga.name,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

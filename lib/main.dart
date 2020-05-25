@@ -85,11 +85,25 @@ class _MyHomePageState extends State<MyHomePage> {
         activeColor: CupertinoColors.white,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.home),
+            icon: Icon(
+              IconData(
+                0xf38c,
+                fontFamily: 'CupertinoIcons',
+                fontPackage: 'cupertino_icons',
+                matchTextDirection: true
+              ),
+            ),
             title: Text('Discover'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.search),
+            icon: Icon(
+              IconData(
+                0xf4a4,
+                fontFamily: 'CupertinoIcons',
+                fontPackage: 'cupertino_icons',
+                matchTextDirection: true
+              ),
+            ),
             title: Text('Search'),
           ),
         ],
@@ -110,12 +124,12 @@ class _MyHomePageState extends State<MyHomePage> {
           case 1:
             return CupertinoTabView(
               builder: (context) {
-              return CupertinoPageScaffold(
-                resizeToAvoidBottomInset: false,
-                child: Search(),
-              );
-            }
-          );
+                return CupertinoPageScaffold(
+                  resizeToAvoidBottomInset: false,
+                  child: Search(),
+                );
+              }
+            );
         }
       },
     );
