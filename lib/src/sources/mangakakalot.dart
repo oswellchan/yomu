@@ -251,7 +251,7 @@ class MangakakalotSearchCursor extends MangakakalotLatestCursor {
   }
 
   Future<List<Manga>> getNext() async {
-    var url = 'https://mangakakalot.com/search/$searchTerm?page=$_index';
+    var url = 'https://mangakakalot.com/search/story/$searchTerm?page=$_index';
     url = Uri.encodeFull(url);
     final response = await http.get(url);
     var mangas = _getMangas(response.body);
