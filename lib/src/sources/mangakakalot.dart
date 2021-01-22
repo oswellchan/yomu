@@ -26,7 +26,7 @@ class Mangakakalot extends Source {
       final response = await _getNeloWebPage(mangaUrl);
       return await _parseNeloDetails(mangaUrl, response.body);
     }
-    
+
     final response = await http.get(mangaUrl);
     return await _parseKakalotDetails(mangaUrl, response.body);
   }
@@ -45,10 +45,7 @@ class Mangakakalot extends Source {
 
     var results = <Chapter>[];
     elements.forEach((element) {
-      var chapter = Chapter(
-        element.attributes['href'],
-        element.text
-      );
+      var chapter = Chapter(element.attributes['href'], element.text);
       if (chapter != null) {
         if (allReadSet.contains(chapter.url)) {
           chapter.isRead = true;
@@ -60,7 +57,8 @@ class Mangakakalot extends Source {
     return MangaDetails('', results);
   }
 
-  Future<MangaDetails> _parseKakalotDetails(String mangaUrl, String body) async {
+  Future<MangaDetails> _parseKakalotDetails(
+      String mangaUrl, String body) async {
     var document = parse(body);
     var elements = document.getElementsByClassName('chapter-list');
 
@@ -109,7 +107,8 @@ class Mangakakalot extends Source {
 
     final response = await http.get(chptUrl);
     var pages = _getKakalotPages(response.body);
-    var prevNextChapter = _getPrevNextKakalotChapterUrls(response.body, chptUrl);
+    var prevNextChapter =
+        _getPrevNextKakalotChapterUrls(response.body, chptUrl);
 
     return MangaPages(pages, prevNextChapter[0], prevNextChapter[1]);
   }
@@ -122,7 +121,9 @@ class Mangakakalot extends Source {
     var imgUrls = <String>[];
     pages[0].children.forEach((img) {
       var imgSrc = img.attributes['src'];
-      if (imgSrc == null || !imgSrc.startsWith('https://') || !imgSrc.endsWith('.jpg')) {
+      if (imgSrc == null ||
+          !imgSrc.startsWith('https://') ||
+          !imgSrc.endsWith('.jpg')) {
         return;
       }
       imgUrls.add(imgSrc);
@@ -134,12 +135,15 @@ class Mangakakalot extends Source {
   List<String> _getKakalotPages(String body) {
     var document = parse(body);
 
-    var pages = document.getElementById('vungdoc');
+    var pages =
+        document.getElementsByClassName('container-chapter-reader').first;
 
     var imgUrls = <String>[];
     pages.children.forEach((img) {
       var imgSrc = img.attributes['src'];
-      if (imgSrc == null || !imgSrc.startsWith('https://') || !imgSrc.endsWith('.jpg')) {
+      if (imgSrc == null ||
+          !imgSrc.startsWith('https://') ||
+          !imgSrc.endsWith('.jpg')) {
         return;
       }
       imgUrls.add(imgSrc);
@@ -150,8 +154,10 @@ class Mangakakalot extends Source {
 
   List<String> _getPrevNextNeloChapterUrls(String body, chptUrl) {
     var document = parse(body);
-    var prevE = document.getElementsByClassName('navi-change-chapter-btn-prev a-h');
-    var nextE = document.getElementsByClassName('navi-change-chapter-btn-next a-h');
+    var prevE =
+        document.getElementsByClassName('navi-change-chapter-btn-prev a-h');
+    var nextE =
+        document.getElementsByClassName('navi-change-chapter-btn-next a-h');
 
     return [
       prevE.isEmpty ? '' : prevE[0].attributes['href'],
@@ -182,7 +188,8 @@ class MangakakalotLatestCursor extends Cursor {
   }
 
   Future<List<Manga>> getNext() async {
-    var url = 'https://mangakakalot.com/manga_list?type=latest&category=all&state=all&page=$_index';
+    var url =
+        'https://mangakakalot.com/manga_list?type=latest&category=all&state=all&page=$_index';
     final response = await http.get(url);
     var mangas = _getMangas(response.body);
 
@@ -203,7 +210,7 @@ class MangakakalotLatestCursor extends Cursor {
     elements.forEach((element) {
       var manga = _parseManga(element);
       if (manga != null) {
-        results.add(manga); 
+        results.add(manga);
       }
     });
 
@@ -219,8 +226,7 @@ class MangakakalotLatestCursor extends Cursor {
     var eCover = elements[0];
 
     if (!eCover.attributes.containsKey('href') ||
-      !eCover.attributes.containsKey('title')
-    ) {
+        !eCover.attributes.containsKey('title')) {
       return null;
     }
 
@@ -273,7 +279,7 @@ class MangakakalotSearchCursor extends MangakakalotLatestCursor {
     elements.forEach((element) {
       var manga = _parseManga(element);
       if (manga != null) {
-        results.add(manga); 
+        results.add(manga);
       }
     });
 
@@ -323,7 +329,7 @@ Future<Response> _getNeloWebPage(String url) async {
 }
 
 bool _isPHPError(String body) {
-    var exp = new RegExp(r'<h4>A PHP Error was encountered</h4>');
+  var exp = new RegExp(r'<h4>A PHP Error was encountered</h4>');
 
-    return !(exp.firstMatch(body) == null);
+  return !(exp.firstMatch(body) == null);
 }
