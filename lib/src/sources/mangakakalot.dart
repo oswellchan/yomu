@@ -159,9 +159,17 @@ class Mangakakalot extends Source {
     var nextE =
         document.getElementsByClassName('navi-change-chapter-btn-next a-h');
 
+    // for when website mistakenly links next/prev chapter as current chapter
+    var prevChptUrl = prevE.isEmpty || prevE[0].attributes['href'] == chptUrl
+        ? ''
+        : prevE[0].attributes['href'];
+    var nextChptUrl = nextE.isEmpty || nextE[0].attributes['href'] == chptUrl
+        ? ''
+        : nextE[0].attributes['href'];
+
     return [
-      prevE.isEmpty ? '' : prevE[0].attributes['href'],
-      nextE.isEmpty ? '' : nextE[0].attributes['href'],
+      prevChptUrl,
+      nextChptUrl,
     ];
   }
 
