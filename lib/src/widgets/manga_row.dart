@@ -6,7 +6,6 @@ import '../sources/base.dart';
 import '../widgets/spinner.dart';
 
 class MangaRow extends StatelessWidget {
-
   MangaRow({
     @required this.mangas,
   });
@@ -18,29 +17,22 @@ class MangaRow extends StatelessWidget {
     var widgets = <Widget>[];
     mangas.forEach((manga) {
       Widget widget = Container();
-      
+
       if (manga != null) {
         widget = MangaTile(
-          thumbnailUrl: manga.thumbnailUrl,
-          name: manga.name,
-          lastUpdated: manga.lastUpdated,
-          onPress: () {
-            Navigator.of(context, rootNavigator: true).pushNamed(
-              '/manga',
-              arguments: manga
-            );
-          }
-        );
+            thumbnailUrl: manga.thumbnailUrl,
+            name: manga.name,
+            lastUpdated: manga.lastUpdated,
+            referrer: manga.mangaUrl,
+            onPress: () {
+              Navigator.of(context, rootNavigator: true)
+                  .pushNamed('/manga', arguments: manga);
+            });
       }
 
-      widgets.add(
-        Flexible(
-          child: FractionallySizedBox(
-            widthFactor: 0.95,
-            child: widget
-          ),
-        )
-      );
+      widgets.add(Flexible(
+        child: FractionallySizedBox(widthFactor: 0.95, child: widget),
+      ));
     });
 
     return Row(
@@ -51,17 +43,18 @@ class MangaRow extends StatelessWidget {
 }
 
 class MangaTile extends StatelessWidget {
-
   MangaTile({
     @required this.thumbnailUrl,
     @required this.name,
     @required this.lastUpdated,
+    this.referrer,
     this.onPress,
   });
 
   final String thumbnailUrl;
   final String name;
   final String lastUpdated;
+  final String referrer;
   final Function onPress;
 
   @override
@@ -72,15 +65,15 @@ class MangaTile extends StatelessWidget {
         width: double.infinity,
         height: 200,
         child: CachedNetworkImage(
-          imageUrl: thumbnailUrl,
-          placeholder: (context, url) => Center(
-            child: Spinner(),
-          ),
-          errorWidget: (context, url, error) => Container(
-            color: CupertinoColors.systemGrey,
-            child: Icon(Icons.error),
-          )
-        ),
+            imageUrl: thumbnailUrl,
+            httpHeaders: {'referer': referrer},
+            placeholder: (context, url) => Center(
+                  child: Spinner(),
+                ),
+            errorWidget: (context, url, error) => Container(
+                  color: CupertinoColors.systemGrey,
+                  child: Icon(Icons.error),
+                )),
       ),
     );
 
@@ -105,14 +98,13 @@ class MangaTile extends StatelessWidget {
       ),
     );
 
-    return GestureDetector (
-      child: Column(
-        children: <Widget>[
-          cover,
-          text,
-        ],
-      ),
-      onTap: onPress
-    );
+    return GestureDetector(
+        child: Column(
+          children: <Widget>[
+            cover,
+            text,
+          ],
+        ),
+        onTap: onPress);
   }
 }
