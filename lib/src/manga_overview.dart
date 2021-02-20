@@ -5,23 +5,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'database/db.dart';
 import 'reader/arguments.dart';
 import 'sources/base.dart';
-import 'sources/mangatown.dart';
 import 'sources/mangakakalot.dart';
 import 'widgets/spinner.dart';
 
-
 class MangaOverviewState extends State<MangaOverview> with RouteAware {
-
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero,() {
+    Future.delayed(Duration.zero, () {
       final Manga manga = ModalRoute.of(context).settings.arguments;
       DBHelper().saveManga(
-        Mangakakalot().name,
-        manga.mangaUrl,
-        manga.name,
-      );
+          Mangakakalot().name, manga.mangaUrl, manga.name, manga.thumbnailUrl);
     });
   }
 
@@ -30,8 +24,8 @@ class MangaOverviewState extends State<MangaOverview> with RouteAware {
     final Manga manga = ModalRoute.of(context).settings.arguments;
 
     return CupertinoPageScaffold(
-      child: SafeArea(
-        child: Container(
+        child: SafeArea(
+      child: Container(
           color: CupertinoColors.black,
           child: Column(
             children: <Widget>[
@@ -43,47 +37,38 @@ class MangaOverviewState extends State<MangaOverview> with RouteAware {
                 ),
               ),
             ],
-          )
-        ),
-      )
-    );
+          )),
+    ));
   }
 }
 
 class MangaOverview extends StatefulWidget {
-
   final RouteObserver<PageRoute> routeObserver;
 
-  MangaOverview({
-    @required this.routeObserver
-  });
+  MangaOverview({@required this.routeObserver});
 
   @override
   MangaOverviewState createState() => MangaOverviewState();
 }
 
 class NavBar extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        CupertinoButton(
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop(context);
-          },
-          child: Icon(
-            CupertinoIcons.clear_thick,
-            color: CupertinoColors.white,
-          ),
+    return Row(children: <Widget>[
+      CupertinoButton(
+        onPressed: () {
+          Navigator.of(context, rootNavigator: true).pop(context);
+        },
+        child: Icon(
+          CupertinoIcons.clear_thick,
+          color: CupertinoColors.white,
         ),
-      ]
-    );
+      ),
+    ]);
   }
 }
 
 class MangaDetail extends StatelessWidget {
-
   final Manga manga;
   final RouteObserver<PageRoute> routeObserver;
 
@@ -99,17 +84,16 @@ class MangaDetail extends StatelessWidget {
         SizedBox(
           height: 200,
           child: CachedNetworkImage(
-            imageUrl: manga.thumbnailUrl,
-            placeholder: (context, url) => Center(
-              child: Spinner(),
-            ),
-            errorWidget: (context, url, error) => Container(
-              width: 150,
-              height: 200,
-              color: CupertinoColors.systemGrey,
-              child: Icon(Icons.error),
-            )
-          ),
+              imageUrl: manga.thumbnailUrl,
+              placeholder: (context, url) => Center(
+                    child: Spinner(),
+                  ),
+              errorWidget: (context, url, error) => Container(
+                    width: 150,
+                    height: 200,
+                    color: CupertinoColors.systemGrey,
+                    child: Icon(Icons.error),
+                  )),
         ),
         SizedBox(height: 20),
         FractionallySizedBox(
@@ -159,7 +143,6 @@ class ChaptersState extends State<Chapters> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-
     if (!_fetching) {
       _fetchMangaDetails();
       return Spinner();
@@ -169,23 +152,21 @@ class ChaptersState extends State<Chapters> with RouteAware {
 
     return Container(
       child: FractionallySizedBox(
-        widthFactor: 0.8,
-        child: ListView.separated(
-          itemCount: _chapters.length,
-          separatorBuilder: (BuildContext context, int index) {
-            return Divider(
-              color: CupertinoColors.systemGrey.withOpacity(0.5),
-            );
-          },
-          itemBuilder: (BuildContext _context, int i) {
-            var chapter = _chapters[length - i - 1];
-            return ChapterTile(
-              chapter: chapter,
-              manga: widget.mangaUrl,
-            );
-          }
-        )
-      ),
+          widthFactor: 0.8,
+          child: ListView.separated(
+              itemCount: _chapters.length,
+              separatorBuilder: (BuildContext context, int index) {
+                return Divider(
+                  color: CupertinoColors.systemGrey.withOpacity(0.5),
+                );
+              },
+              itemBuilder: (BuildContext _context, int i) {
+                var chapter = _chapters[length - i - 1];
+                return ChapterTile(
+                  chapter: chapter,
+                  manga: widget.mangaUrl,
+                );
+              })),
     );
   }
 
@@ -204,7 +185,6 @@ class ChaptersState extends State<Chapters> with RouteAware {
 }
 
 class Chapters extends StatefulWidget {
-
   final String mangaUrl;
   final RouteObserver<PageRoute> routeObserver;
 
@@ -218,42 +198,35 @@ class Chapters extends StatefulWidget {
 }
 
 class ChapterTileState extends State<ChapterTile> {
-
   @override
   Widget build(BuildContext context) {
     var textColour = widget.chapter.isRead ? CupertinoColors.systemGrey : null;
 
-    return GestureDetector (
-      child: Container(
-        height: 30,
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            widget.chapter.text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: textColour,
-              fontSize: 16,
-            ),
-          ),
-        )
-      ),
-      onTap: () {
-        Navigator.of(context, rootNavigator: true).pushNamed(
-          '/read',
-          arguments: ReaderArguments(
-            widget.manga,
-            widget.chapter.url
-          ),
-        );
-      }
-    );
+    return GestureDetector(
+        child: Container(
+            height: 30,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                widget.chapter.text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textColour,
+                  fontSize: 16,
+                ),
+              ),
+            )),
+        onTap: () {
+          Navigator.of(context, rootNavigator: true).pushNamed(
+            '/read',
+            arguments: ReaderArguments(widget.manga, widget.chapter.url),
+          );
+        });
   }
 }
 
 class ChapterTile extends StatefulWidget {
-
   final Chapter chapter;
   final String manga;
 

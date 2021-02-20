@@ -5,19 +5,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../database/db.dart';
 import '../manga_overview.dart';
-import '../sources/mangatown.dart';
 import '../sources/mangakakalot.dart';
 import '../widgets/spinner.dart';
 import '../widgets/zoomable_widget.dart';
 import 'arguments.dart';
-
 
 class ReaderState extends State<Reader> {
   final Mangakakalot _source = Mangakakalot();
   final List<String> _images = <String>[];
   final Set<String> _chapters = <String>{};
   String _manga;
-  
+
   bool _isFetching = false;
   String _prevChapter = '';
   String _currChapter = '';
@@ -34,36 +32,32 @@ class ReaderState extends State<Reader> {
     }
 
     return CupertinoPageScaffold(
-      child: SafeArea(
-        child: Column(
-          children: <Widget>[
-            NavBar(),
-            Expanded(
-              child: ZoomableWidget(
-                child: _buildPages(this._images),
-                onInteract: null,
-              ),
-            ),
-          ],
-        )
-      )
-    );
+        child: SafeArea(
+            child: Column(
+      children: <Widget>[
+        NavBar(),
+        Expanded(
+          child: ZoomableWidget(
+            child: _buildPages(this._images),
+            onInteract: null,
+          ),
+        ),
+      ],
+    )));
   }
 
   Widget _buildPages(List<String> images) {
-    return ListView.builder(
-      itemBuilder: (BuildContext _context, int i) {
-        if (i >= _images.length) {
-          if (_nextChapter != '' && !_isFetching) {
-            _fetchPages(_nextChapter);
-            return Spinner();
-          }
-          return null;
+    return ListView.builder(itemBuilder: (BuildContext _context, int i) {
+      if (i >= _images.length) {
+        if (_nextChapter != '' && !_isFetching) {
+          _fetchPages(_nextChapter);
+          return Spinner();
         }
-
-        return _buildPage(images[i], _manga);
+        return null;
       }
-    );
+
+      return _buildPage(images[i], _manga);
+    });
   }
 
   void _fetchPages(String url) async {
@@ -74,11 +68,10 @@ class ReaderState extends State<Reader> {
     _isFetching = true;
     var chpt = await _source.getChapterPages(url);
 
-    if (_manga != '') DBHelper().saveRead(
-      _source.name, _manga, url
-    );
+    if (_manga != '')
+      DBHelper().saveRead(_source.name, _manga, url, chpt.title);
 
-    if (!mounted) return;    
+    if (!mounted) return;
     setState(() {
       _chapters.add(url);
       _prevChapter = chpt.prevChapterUrl;
@@ -104,15 +97,14 @@ Widget _buildPage(String pageUrl, String mangaUrl) {
   return Container(
     padding: const EdgeInsets.only(bottom: 10),
     child: CachedNetworkImage(
-      httpHeaders: {'referer': mangaUrl},
-      imageUrl: pageUrl,
-      placeholder: (context, url) => Center(
-        child: Spinner(),
-      ),
-      errorWidget: (context, url, error) => Container(
-        color: CupertinoColors.systemGrey,
-        child: Icon(Icons.error),
-      )
-    ),
+        httpHeaders: {'referer': mangaUrl},
+        imageUrl: pageUrl,
+        placeholder: (context, url) => Center(
+              child: Spinner(),
+            ),
+        errorWidget: (context, url, error) => Container(
+              color: CupertinoColors.systemGrey,
+              child: Icon(Icons.error),
+            )),
   );
 }

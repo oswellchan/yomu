@@ -1,14 +1,12 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/cupertino.dart';
 
-
-class ZoomableWidgetState extends State<ZoomableWidget> 
-  with TickerProviderStateMixin {
+class ZoomableWidgetState extends State<ZoomableWidget>
+    with TickerProviderStateMixin {
   var oldGlobalPoint = Offset.zero;
-  
+
   var _scale = 1.0;
   var _reference = Offset.zero;
   var _translateOffset = Offset.zero;
@@ -30,24 +28,18 @@ class ZoomableWidgetState extends State<ZoomableWidget>
       begin: 1.0,
       end: 2.0,
     ).animate(new CurvedAnimation(
-      parent: _zoomController,
-      curve: Curves.easeOutExpo
-    ));
+        parent: _zoomController, curve: Curves.easeOutExpo));
 
     _resetAnimation = new Tween(
       begin: 1.0,
       end: 2.0,
     ).animate(new CurvedAnimation(
-      parent: _resetController,
-      curve: Curves.easeInExpo
-    ));
+        parent: _resetController, curve: Curves.easeInExpo));
   }
 
   void _initZoomController() {
-    _zoomController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 300)
-    );
+    _zoomController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
     _zoomController.addListener(() {
       setState(() {
         _scale = _zoomAnimation.value;
@@ -56,10 +48,8 @@ class ZoomableWidgetState extends State<ZoomableWidget>
   }
 
   void _initResetController() {
-    _resetController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 300)
-    );
+    _resetController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
     _resetController.addListener(() {
       setState(() {
         var val = _resetAnimation.value;
@@ -82,7 +72,7 @@ class ZoomableWidgetState extends State<ZoomableWidget>
     _resetController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return ClipRect(
@@ -117,7 +107,7 @@ class ZoomableWidgetState extends State<ZoomableWidget>
 
   bool _isDoubleTap(Offset currGlobalPoint) {
     if ((oldGlobalPoint.dx - currGlobalPoint.dx).abs() < 20 &&
-      (oldGlobalPoint.dy - currGlobalPoint.dy).abs() < 20) {
+        (oldGlobalPoint.dy - currGlobalPoint.dy).abs() < 20) {
       return true;
     }
     return false;
@@ -141,10 +131,8 @@ class ZoomableWidgetState extends State<ZoomableWidget>
 
   void applyZoom(Offset doubleTapPoint) {
     _zoomOffset = doubleTapPoint;
-    _reference = Offset(
-      doubleTapPoint.dx,
-      context.size.height - doubleTapPoint.dy
-    );
+    _reference =
+        Offset(doubleTapPoint.dx, context.size.height - doubleTapPoint.dy);
     _zoomController.forward(from: 0.0);
   }
 
@@ -154,9 +142,9 @@ class ZoomableWidgetState extends State<ZoomableWidget>
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    if (_scale == 1.0 || 
-      _zoomController.isAnimating || 
-      _resetController.isAnimating) {
+    if (_scale == 1.0 ||
+        _zoomController.isAnimating ||
+        _resetController.isAnimating) {
       return;
     }
 

@@ -6,9 +6,9 @@ import 'src/discover.dart';
 import 'src/manga_overview.dart';
 import 'src/search.dart';
 import 'src/reader/reader.dart';
+import 'src/recent.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
-
 
 void main() {
   runApp(MyApp());
@@ -77,6 +77,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int _currentIndex = 0;
+
+  void setCurrentIndex(index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,51 +92,48 @@ class _MyHomePageState extends State<MyHomePage> {
         activeColor: CupertinoColors.white,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(
-              IconData(
-                0xf38c,
-                fontFamily: 'CupertinoIcons',
-                fontPackage: 'cupertino_icons',
-                matchTextDirection: true
-              ),
-            ),
-            title: Text('Discover'),
+            icon: Icon(CupertinoIcons.compass),
+            label: 'Discover',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              IconData(
-                0xf4a4,
-                fontFamily: 'CupertinoIcons',
-                fontPackage: 'cupertino_icons',
-                matchTextDirection: true
-              ),
-            ),
-            title: Text('Search'),
+            icon: Icon(CupertinoIcons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.time),
+            label: 'Recent',
           ),
         ],
+        onTap: setCurrentIndex,
       ),
       tabBuilder: (context, index) {
         switch (index) {
           case 0:
-            return CupertinoTabView(
-              builder: (context) {
-                return CupertinoPageScaffold(
-                  navigationBar: CupertinoNavigationBar(
-                    middle: const Text('Discover')
-                  ),
-                  child: Discover(),
-                );
-              }
-            );
+            return CupertinoTabView(builder: (context) {
+              return CupertinoPageScaffold(
+                navigationBar:
+                    CupertinoNavigationBar(middle: const Text('Discover')),
+                child: Discover(),
+              );
+            });
           case 1:
-            return CupertinoTabView(
-              builder: (context) {
-                return CupertinoPageScaffold(
-                  resizeToAvoidBottomInset: false,
-                  child: Search(),
-                );
-              }
-            );
+            return CupertinoTabView(builder: (context) {
+              return CupertinoPageScaffold(
+                resizeToAvoidBottomInset: false,
+                child: Search(),
+              );
+            });
+          case 2:
+            return CupertinoTabView(builder: (context) {
+              return CupertinoPageScaffold(
+                resizeToAvoidBottomInset: false,
+                navigationBar:
+                    CupertinoNavigationBar(middle: const Text('Recent')),
+                child: Recent(
+                  shouldReload: _currentIndex == 2,
+                ),
+              );
+            });
         }
       },
     );

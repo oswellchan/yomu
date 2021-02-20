@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'sources/base.dart';
-import 'sources/mangatown.dart';
 import 'sources/mangakakalot.dart';
 import 'widgets/manga_row.dart';
 import 'widgets/search_bar.dart';
@@ -15,7 +14,6 @@ class SearchState extends State<Search> {
 
   TextEditingController _controller;
   FocusNode _focusNode;
-  String _terms = '';
 
   @override
   void initState() {
@@ -71,27 +69,27 @@ class SearchState extends State<Search> {
                     right: 8.0,
                   ),
                   child: ListView.builder(
-                    itemBuilder: (BuildContext _context, int i) {
-                      var start = i * 3;
-                      if (start >= _mangas.length) {
-                        if (_notFetching) {
-                          _notFetching = false;
-                          _fetchNextList();
-                        }
-                        return null;
+                      itemBuilder: (BuildContext _context, int i) {
+                    var start = i * 3;
+                    if (start >= _mangas.length) {
+                      if (_notFetching) {
+                        _notFetching = false;
+                        _fetchNextList();
                       }
-
-                      var mangas = <Manga>[];
-                      if (start + 3 <= _mangas.length) {
-                        mangas = _mangas.sublist(start, start + 3);
-                      } else {
-                        var temp = _mangas.sublist(start);
-                        mangas = temp + List.filled(start + 3 - _mangas.length, null);
-                      }
-
-                      return MangaRow(mangas: mangas);
+                      return null;
                     }
-                  ),
+
+                    var mangas = <Manga>[];
+                    if (start + 3 <= _mangas.length) {
+                      mangas = _mangas.sublist(start, start + 3);
+                    } else {
+                      var temp = _mangas.sublist(start);
+                      mangas =
+                          temp + List.filled(start + 3 - _mangas.length, null);
+                    }
+
+                    return MangaRow(mangas: mangas);
+                  }),
                 ),
               ),
             ],
