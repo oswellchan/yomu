@@ -20,7 +20,7 @@ class MangaLongTile extends StatelessWidget {
   Widget build(BuildContext context) {
     var cover = Container(
       child: SizedBox(
-        width: 120,
+        width: 80,
         child: CachedNetworkImage(
             imageUrl: manga.thumbnailUrl,
             placeholder: (context, url) => Center(
