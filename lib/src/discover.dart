@@ -6,7 +6,6 @@ import 'sources/mangakakalot.dart';
 import 'widgets/manga_row.dart';
 import 'widgets/spinner.dart';
 
-
 class DiscoverState extends State<Discover> {
   final Source _source = Mangakakalot();
   List<Manga> _mangas = <Manga>[];
@@ -24,39 +23,32 @@ class DiscoverState extends State<Discover> {
       if (!_fetching) {
         _fetchNextList();
       } else {
-        child = Center(
-          child: Spinner()
-        );
+        child = Center(child: Spinner());
       }
     } else {
       child = _buildList();
     }
 
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      child: child
-    );
+    return Container(padding: const EdgeInsets.all(8.0), child: child);
   }
 
   Widget _buildList() {
-    return ListView.builder(
-      itemBuilder: (BuildContext _context, int i) {
-        if (i * 3 >= _mangas.length) {
-          if (!_fetching) {
-            _fetchNextList();
-            return Spinner();
-          }
-          return null;
+    return ListView.builder(itemBuilder: (BuildContext _context, int i) {
+      if (i * 3 >= _mangas.length) {
+        if (!_fetching) {
+          _fetchNextList();
+          return Spinner();
         }
-
-        var start = i * 3;
-        if (start + 3 <= _mangas.length) {
-          return MangaRow(mangas: _mangas.sublist(start, start + 3));
-        }
-
         return null;
       }
-    );
+
+      var start = i * 3;
+      if (start + 3 <= _mangas.length) {
+        return MangaRow(mangas: _mangas.sublist(start, start + 3));
+      }
+
+      return null;
+    });
   }
 
   void _fetchNextList() async {

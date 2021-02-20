@@ -21,6 +21,28 @@ class Mangakakalot extends Source {
     return MangakakalotSearchCursor(search);
   }
 
+  Future<List> getRecentMangas(int n) async {
+    if (n < 1) {
+      return [];
+    }
+
+    var results = await DBHelper().getAllRecents(name, n);
+    var recents = [];
+
+    for (final row in results) {
+      recents.add([
+        Manga(
+          name: row['name'],
+          thumbnailUrl: row['thumbnail'],
+          mangaUrl: row['manga'],
+        ),
+        Chapter.withLastRead(row['chapter'], row['chapter_name'], row['ts']),
+      ]);
+    }
+
+    return recents;
+  }
+
   Future<MangaDetails> getMangaDetails(String mangaUrl) async {
     if (mangaUrl.contains('https://manganelo.com/')) {
       final response = await _getNeloWebPage(mangaUrl);
@@ -102,15 +124,17 @@ class Mangakakalot extends Source {
       final response = await _getNeloWebPage(chptUrl);
       var pages = _getNeloPages(response.body);
       var prevNextChapter = _getPrevNextNeloChapterUrls(response.body, chptUrl);
-      return MangaPages(pages, prevNextChapter[0], prevNextChapter[1]);
+      var title = _getNeloChapterTitle(response.body, chptUrl);
+      return MangaPages(pages, prevNextChapter[0], prevNextChapter[1], title);
     }
 
     final response = await http.get(chptUrl);
     var pages = _getKakalotPages(response.body);
     var prevNextChapter =
         _getPrevNextKakalotChapterUrls(response.body, chptUrl);
+    var title = _getKakalotChapterTitle(response.body, chptUrl);
 
-    return MangaPages(pages, prevNextChapter[0], prevNextChapter[1]);
+    return MangaPages(pages, prevNextChapter[0], prevNextChapter[1], title);
   }
 
   List<String> _getNeloPages(String body) {
@@ -130,6 +154,21 @@ class Mangakakalot extends Source {
     });
 
     return imgUrls;
+  }
+
+  String _getNeloChapterTitle(String body, String chaptUrl) {
+    var document = parse(body);
+
+    var crumbs = document.getElementsByClassName('panel-breadcrumb').first;
+
+    var anchors = crumbs.getElementsByTagName('a');
+    for (final anchor in anchors) {
+      if (anchor.attributes['href'] == chaptUrl) {
+        return anchor.text;
+      }
+    }
+
+    return '';
   }
 
   List<String> _getKakalotPages(String body) {
@@ -185,10 +224,27 @@ class Mangakakalot extends Source {
       nextE.isEmpty ? '' : nextE[0].attributes['href'],
     ];
   }
+
+  String _getKakalotChapterTitle(String body, String chaptUrl) {
+    var document = parse(body);
+
+    var crumbs = document
+        .getElementsByClassName('breadcrumb breadcrumbs bred_doc')
+        .first;
+
+    var anchors = crumbs.getElementsByTagName('a');
+    for (final anchor in anchors) {
+      if (anchor.attributes['href'] == chaptUrl) {
+        var span = anchor.getElementsByTagName('span').first;
+        return span.text;
+      }
+    }
+
+    return '';
+  }
 }
 
 class MangakakalotLatestCursor extends Cursor {
-  Set<Manga> _oldResult;
   num _index;
 
   MangakakalotLatestCursor() {

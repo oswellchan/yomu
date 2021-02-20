@@ -7,7 +7,6 @@ import 'package:html/parser.dart';
 import '../database/db.dart';
 import 'base.dart';
 
-
 class MangaTown extends Source {
   final name = 'MangaTown';
   final url = 'https://www.mangatown.com/';
@@ -23,7 +22,7 @@ class MangaTown extends Source {
   Future<MangaDetails> getMangaDetails(String mangaUrl) async {
     final url = '${this.url}$mangaUrl';
     final response = await http.get(url);
-    
+
     var document = parse(response.body);
     var elements = document.getElementsByClassName('chapter_list');
 
@@ -80,7 +79,7 @@ class MangaTown extends Source {
 
     var prevNextChapter = _getPrevNextChapterUrls(response.body, chptUrl);
 
-    return MangaPages(pages, prevNextChapter[0], prevNextChapter[1]);
+    return MangaPages(pages, prevNextChapter[0], prevNextChapter[1], '');
   }
 
   num _getNumberOfPages(String body, chptUrl) {
@@ -93,7 +92,7 @@ class MangaTown extends Source {
       try {
         var pageNoNum = int.parse(pageNoStr);
         maxPages = max(maxPages, pageNoNum);
-      } catch(e) {
+      } catch (e) {
         print(e);
       }
     });
@@ -143,10 +142,15 @@ class MangaTown extends Source {
 
     return [prevChapter, nextChapter];
   }
+
+  @override
+  Future<List> getRecentMangas(int n) {
+    // TODO: implement getRecentMangas
+    throw UnimplementedError();
+  }
 }
 
 class MangaTownLatestCursor extends Cursor {
-  Set<Manga> _oldResult;
   num _index;
 
   MangaTownLatestCursor() {
@@ -175,7 +179,7 @@ class MangaTownLatestCursor extends Cursor {
     elements[0].children.forEach((element) {
       var manga = _parseManga(element);
       if (manga != null) {
-        results.add(manga); 
+        results.add(manga);
       }
     });
 
@@ -190,8 +194,7 @@ class MangaTownLatestCursor extends Cursor {
     }
     var eCover = elements[0];
     if (!eCover.attributes.containsKey('href') ||
-      !eCover.attributes.containsKey('title')
-    ) {
+        !eCover.attributes.containsKey('title')) {
       return null;
     }
 
@@ -227,7 +230,7 @@ class MangaTownSearchCursor extends MangaTownLatestCursor {
   }
 
   Future<List<Manga>> getNext() async {
-    var url = 'https://www.mangatown.com/search?page=$_index&name=${searchTerm}';
+    var url = 'https://www.mangatown.com/search?page=$_index&name=$searchTerm';
     url = Uri.encodeFull(url);
     final response = await http.get(url);
     var mangas = _getMangas(response.body);

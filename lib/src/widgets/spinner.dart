@@ -2,14 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
 class Spinner extends StatelessWidget {
+  final height;
+  final width;
 
-  var height = 70.0;
-  var width = 70.0;
-
-  Spinner({
-    this.height,
-    this.width
-  });
+  Spinner({this.height = 70.0, this.width = 70.0});
 
   @override
   Widget build(BuildContext context) {
