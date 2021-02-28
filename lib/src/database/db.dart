@@ -79,14 +79,14 @@ class DBHelper {
       SELECT manga.*, read.ts, read.chapter_name, read.chapter FROM read
       INNER JOIN manga ON manga.manga = read.manga
       WHERE read.id in (
-        SELECT r1.id as rid FROM read r1 LEFT JOIN read r2
-        ON (r1.manga = r2.manga AND r1.ts < r2.ts AND r1.source = r2.source)
-        WHERE r2.id IS NULL AND r1.source = ?
-        AND manga.thumbnail IS NOT NULL
-        AND read.chapter_name IS NOT NULL
-        ORDER BY r1.ts DESC
+        SELECT MAX(r1.id) as rid FROM read r1
+        WHERE r1.source = ?
+        GROUP BY r1.manga
+        ORDER BY MAX(r1.ts) DESC
         LIMIT ?
       )
+      AND manga.thumbnail IS NOT NULL
+      AND read.chapter_name IS NOT NULL
       ORDER BY ts DESC
       ''', [source, n]);
 
