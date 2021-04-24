@@ -93,18 +93,66 @@ class Reader extends StatefulWidget {
   ReaderState createState() => ReaderState();
 }
 
+class MangaPageState extends State<MangaPage> {
+  int reloadCount = 0;
+  int oldReloadCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    var reload = GestureDetector(
+        child: SizedBox(
+            child: Icon(
+              CupertinoIcons.refresh,
+              color: CupertinoColors.white,
+            ),
+            width: 50),
+        onTap: () {
+          setState(() {
+            reloadCount += 1;
+          });
+        });
+
+    var cacheKey = reloadCount.toString() + widget.pageUrl;
+
+    Widget child;
+
+    if (reloadCount == oldReloadCount) {
+      child = CachedNetworkImage(
+          httpHeaders: {'referer': widget.mangaUrl},
+          imageUrl: widget.pageUrl,
+          placeholder: (context, url) => Spinner(),
+          errorWidget: (context, url, error) => reload);
+    } else {
+      child = Spinner();
+      _reloadImage(widget.pageUrl, cacheKey);
+    }
+
+    return Container(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: child,
+    );
+  }
+
+  void _reloadImage(String url, String cacheKey) async {
+    await CachedNetworkImage.evictFromCache(url);
+    setState(() {
+      oldReloadCount = reloadCount;
+    });
+  }
+}
+
+class MangaPage extends StatefulWidget {
+  final String pageUrl;
+  final String mangaUrl;
+
+  MangaPage({@required this.pageUrl, this.mangaUrl});
+
+  @override
+  MangaPageState createState() => MangaPageState();
+}
+
 Widget _buildPage(String pageUrl, String mangaUrl) {
   return Container(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: CachedNetworkImage(
-        httpHeaders: {'referer': mangaUrl},
-        imageUrl: pageUrl,
-        placeholder: (context, url) => Center(
-              child: Spinner(),
-            ),
-        errorWidget: (context, url, error) => Container(
-              color: CupertinoColors.systemGrey,
-              child: Icon(Icons.error),
-            )),
-  );
+      padding: const EdgeInsets.only(bottom: 10),
+      child: MangaPage(pageUrl: pageUrl, mangaUrl: mangaUrl));
 }
