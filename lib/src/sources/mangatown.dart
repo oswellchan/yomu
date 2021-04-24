@@ -21,7 +21,7 @@ class MangaTown extends Source {
 
   Future<MangaDetails> getMangaDetails(String mangaUrl) async {
     final url = '${this.url}$mangaUrl';
-    final response = await http.get(url);
+    final response = await http.get(Uri.parse(url));
 
     var document = parse(response.body);
     var elements = document.getElementsByClassName('chapter_list');
@@ -72,7 +72,7 @@ class MangaTown extends Source {
   }
 
   Future<MangaPages> getChapterPages(chptUrl) async {
-    final response = await http.get(this.url + chptUrl);
+    final response = await http.get(Uri.parse(this.url + chptUrl));
 
     var maxPages = _getNumberOfPages(response.body, chptUrl);
     var pages = await _getPages(chptUrl, maxPages);
@@ -103,7 +103,7 @@ class MangaTown extends Source {
   Future<List<String>> _getPages(String chptUrl, num maxPages) async {
     var futures = <Future<http.Response>>[];
     for (var i = 0; i < maxPages; i++) {
-      futures.add(http.get('$url$chptUrl${i + 1}.html'));
+      futures.add(http.get(Uri.parse('$url$chptUrl${i + 1}.html')));
     }
 
     var results = await Future.wait(futures);
@@ -158,7 +158,7 @@ class MangaTownLatestCursor extends Cursor {
   }
 
   Future<List<Manga>> getNext() async {
-    var url = 'https://www.mangatown.com/latest/${this._index}.htm';
+    var url = Uri.parse('https://www.mangatown.com/latest/${this._index}.htm');
     final response = await http.get(url);
     var mangas = _getMangas(response.body);
 
@@ -232,7 +232,7 @@ class MangaTownSearchCursor extends MangaTownLatestCursor {
   Future<List<Manga>> getNext() async {
     var url = 'https://www.mangatown.com/search?page=$_index&name=$searchTerm';
     url = Uri.encodeFull(url);
-    final response = await http.get(url);
+    final response = await http.get(Uri.parse(url));
     var mangas = _getMangas(response.body);
 
     _index += 1;

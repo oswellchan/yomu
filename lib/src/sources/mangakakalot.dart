@@ -49,7 +49,7 @@ class Mangakakalot extends Source {
       return await _parseNeloDetails(mangaUrl, response.body);
     }
 
-    final response = await http.get(mangaUrl);
+    final response = await http.get(Uri.parse(mangaUrl));
     return await _parseKakalotDetails(mangaUrl, response.body);
   }
 
@@ -128,7 +128,8 @@ class Mangakakalot extends Source {
       return MangaPages(pages, prevNextChapter[0], prevNextChapter[1], title);
     }
 
-    final response = await http.get(chptUrl);
+    var url = Uri.parse(chptUrl);
+    final response = await http.get(url);
     var pages = _getKakalotPages(response.body);
     var prevNextChapter =
         _getPrevNextKakalotChapterUrls(response.body, chptUrl);
@@ -252,8 +253,8 @@ class MangakakalotLatestCursor extends Cursor {
   }
 
   Future<List<Manga>> getNext() async {
-    var url =
-        'https://mangakakalot.com/manga_list?type=latest&category=all&state=all&page=$_index';
+    var url = Uri.parse(
+        'https://mangakakalot.com/manga_list?type=latest&category=all&state=all&page=$_index');
     final response = await http.get(url);
     var mangas = _getMangas(response.body);
 
@@ -323,7 +324,7 @@ class MangakakalotSearchCursor extends MangakakalotLatestCursor {
   Future<List<Manga>> getNext() async {
     var url = 'https://mangakakalot.com/search/story/$searchTerm?page=$_index';
     url = Uri.encodeFull(url);
-    final response = await http.get(url);
+    final response = await http.get(Uri.parse(url));
     var mangas = _getMangas(response.body);
 
     _index += 1;
@@ -380,12 +381,12 @@ class MangakakalotSearchCursor extends MangakakalotLatestCursor {
 }
 
 Future<Response> _getNeloWebPage(String url) async {
-  var response = await http.get(url);
+  var response = await http.get(Uri.parse(url));
   var retryCount = 0;
 
   while (_isPHPError(response.body) && retryCount < maxRetry) {
     debugPrint(response.body, wrapWidth: 1024);
-    response = await http.get(url);
+    response = await http.get(Uri.parse(url));
     retryCount += 1;
   }
 
