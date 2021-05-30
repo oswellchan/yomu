@@ -44,7 +44,7 @@ class Mangakakalot extends Source {
   }
 
   Future<MangaDetails> getMangaDetails(String mangaUrl) async {
-    if (mangaUrl.contains('https://manganelo.com/')) {
+    if (mangaUrl.contains('https://readmanganato.com/')) {
       final response = await _getNeloWebPage(mangaUrl);
       return await _parseNeloDetails(mangaUrl, response.body);
     }
@@ -120,7 +120,7 @@ class Mangakakalot extends Source {
   }
 
   Future<MangaPages> getChapterPages(chptUrl) async {
-    if (chptUrl.startsWith('https://manganelo.com/')) {
+    if (chptUrl.startsWith('https://readmanganato.com/')) {
       final response = await _getNeloWebPage(chptUrl);
       var pages = _getNeloPages(response.body);
       var prevNextChapter = _getPrevNextNeloChapterUrls(response.body, chptUrl);
